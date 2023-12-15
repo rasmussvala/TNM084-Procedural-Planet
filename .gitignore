@@ -1,0 +1,8 @@
+# Ignore Node.js dependencies
+node_modules/
+
+# Ignore Vite's build output directory
+/dist
+
+# Ignore any local environment configurations or secrets
+.env
