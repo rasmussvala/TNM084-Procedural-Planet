@@ -1,23 +1,21 @@
 # TNM084-Procedural-Planet
 
-An WebGL project to produce procedurally generated planets.
+This is a WebGL project that produces procedurally generated planets.
 
 ## Prerequisites
 
-Before starting you need:
+Before you start, you need the following:
 
 - Node.js
 - npm (Node Package Manager)
 
-### Getting started
+## Getting Started
 
-A step-by-step guide on how to install and run the project:
+Follow these steps to install and run the project:
 
-1. Clone the repository
+1. Clone the repository.
+2. Navigate to the project directory by running the command: `cd this-repo`.
+3. Install dependencies by running the command: `npm install`.
+4. Start the project by running the command: `npm start`.
 
-2. Navigate to the project directory: cd this-repo
-
-3. Install dependencies: npm install
-
-4. Start the project: npm start
-   You should now be able to access the project in a web browser: 'http://localhost:XXXX'
+You should now be able to access the project in a web browser at 'http://localhost:XXXX'.
