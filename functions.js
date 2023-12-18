@@ -92,21 +92,16 @@ export function setupGUI(updatePlanetGeometry) {
     .add({ mountainHeight: mountainHeight }, "mountainHeight", 0, 2)
     .name("Mountain Height")
     .onChange((value) => {
-      mountainHeight = value;
-      updatePlanetGeometry(mountainHeight);
+      updatePlanetGeometry(value); // Pass only the mountainHeight
     });
 
   controlsFolder.open();
 }
 
 export function createStars() {
-
-  // Create a geometry for the billboard (e.g., a plane)
-  const starGeometry = new THREE.PlaneGeometry(1, 1);
-
   // Load a texture for the star
   const textureLoader = new THREE.TextureLoader();
-  const starTexture = textureLoader.load('images/starBillboard.png');
+  const starTexture = textureLoader.load("images/starBillboard.png");
 
   // Create billboards (stars)
   const numberOfStars = 1000; // Change this to the desired number of stars
@@ -119,7 +114,7 @@ export function createStars() {
       map: starTexture,
       color: 0xffffff, // You can set a color if needed
       transparent: true,
-      blending: THREE.AdditiveBlending // Adjust blending mode as desired
+      blending: THREE.AdditiveBlending, // Adjust blending mode as desired
     });
 
     const star = new THREE.Sprite(starMaterial);

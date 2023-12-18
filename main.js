@@ -28,10 +28,15 @@ scene.add(planet);
 const stars = createStars();
 scene.add(stars);
 
-function updatePlanetGeometry(planet, mountainHeight) {
-  scene.remove(planet);
-  planet.geometry.dispose();
-  planet = createPlanet(mountainHeight);
+function updatePlanetGeometry(mountainHeight) {
+  const oldPlanet = planet;
+
+  scene.remove(oldPlanet);
+  oldPlanet.geometry.dispose();
+
+  // Create a new planet with the updated mountain height
+  const newPlanet = createPlanet(mountainHeight);
+  planet = newPlanet;
   scene.add(planet);
 }
 
