@@ -12,7 +12,7 @@ export function setupSceneAndControls() {
     75,
     window.innerWidth / window.innerHeight,
     0.1,
-    1000
+    100000
   );
   const renderer = new THREE.WebGLRenderer();
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -40,7 +40,7 @@ export function createSun(position, size, strength) {
   });
   const lightMesh = new THREE.Mesh(lightGeometry, lightMaterial);
 
-  const pointLight = new THREE.PointLight(0xff0000, strength, 100);
+  const pointLight = new THREE.PointLight(0xff0000, strength, 0, 1);
 
   if (position) {
     sun.position.copy(position);
@@ -107,7 +107,7 @@ export function createStars() {
   const numberOfStars = 1000; // Change this to the desired number of stars
   const stars = new THREE.Group();
 
-  const maxDistance = 1000; // Set the maximum distance from the center
+  const maxDistance = 2500; // Set the maximum distance from the center
 
   for (let i = 0; i < numberOfStars; i++) {
     const starMaterial = new THREE.SpriteMaterial({
@@ -118,7 +118,7 @@ export function createStars() {
     });
 
     const star = new THREE.Sprite(starMaterial);
-    star.scale.set(1, 1, 1); // Set the initial scale of the stars
+    star.scale.set(1.5, 1.5, 1.5); // Set the initial scale of the stars
 
     // Set random positions for stars away from the center of the scene
     const x = (Math.random() - 0.5) * 2 * maxDistance;
