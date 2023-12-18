@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { Noise } from "noisejs"; // https://github.com/josephg/noisejs - stegu noise
-import { createPhongMaterial } from "./functions.js";
+import { createPhongMaterial, createStars } from "./functions.js";
 
 // Initialize a ranodom seed for the noise
 const noise = new Noise(Math.random());
@@ -66,6 +66,10 @@ const material = createPhongMaterial();
 const planet = new THREE.Mesh(geometry, material);
 scene.add(planet);
 
+// Creates stars
+const stars = createStars();
+scene.add(stars);
+
 // Set initial camera position and update controls
 camera.position.z = 5;
 controls.update();
@@ -73,8 +77,6 @@ controls.update();
 // Animation function
 function animate() {
   requestAnimationFrame(animate);
-  // planet.rotation.x += 0.01;
-  // planet.rotation.y += 0.01;
 
   controls.update();
   renderer.render(scene, camera);

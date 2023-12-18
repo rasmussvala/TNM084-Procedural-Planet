@@ -40,3 +40,43 @@ export function createPhongMaterial() {
       `,
   });
 }
+
+export function createStars() {
+
+  // Create a geometry for the billboard (e.g., a plane)
+  const starGeometry = new THREE.PlaneGeometry(1, 1);
+
+  // Load a texture for the star
+  const textureLoader = new THREE.TextureLoader();
+  const starTexture = textureLoader.load('images/starBillboard.png');
+
+  // Create billboards (stars)
+  const numberOfStars = 1000; // Change this to the desired number of stars
+  const stars = new THREE.Group();
+
+  const maxDistance = 1000; // Set the maximum distance from the center
+
+  for (let i = 0; i < numberOfStars; i++) {
+    const starMaterial = new THREE.SpriteMaterial({
+      map: starTexture,
+      color: 0xffffff, // You can set a color if needed
+      transparent: true,
+      blending: THREE.AdditiveBlending // Adjust blending mode as desired
+    });
+
+    const star = new THREE.Sprite(starMaterial);
+    star.scale.set(1, 1, 1); // Set the initial scale of the stars
+
+    // Set random positions for stars away from the center of the scene
+    const x = (Math.random() - 0.5) * 2 * maxDistance;
+    const y = (Math.random() - 0.5) * 2 * maxDistance;
+    const z = (Math.random() - 0.5) * 2 * maxDistance;
+
+    star.position.set(x, y, z);
+
+    // Add the star to the group
+    stars.add(star);
+  }
+
+  return stars;
+}
