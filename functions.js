@@ -1,10 +1,6 @@
 import * as THREE from "three";
-import { Noise } from "noisejs";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import dat from "dat.gui";
-
-// Initialize a random seed for the noise
-const noise = new Noise(Math.random());
 
 export function setupSceneAndControls() {
   const scene = new THREE.Scene();
@@ -20,7 +16,7 @@ export function setupSceneAndControls() {
 
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.autoRotate = true;
-  controls.autoRotateSpeed = 1.0;
+  controls.autoRotateSpeed = 0.5;
   controls.enableDamping = true;
 
   // Set initial camera position and update controls
@@ -30,95 +26,141 @@ export function setupSceneAndControls() {
   return { scene, camera, renderer, controls };
 }
 
-export function createSun(position, size, strength) {
-  const sun = new THREE.Group();
-
+export function createSun(position, size) {
   const lightGeometry = new THREE.SphereGeometry(size, 16, 16);
   const lightMaterial = new THREE.MeshStandardMaterial({
     color: 0xffffff,
     emissive: 0xffffff,
   });
-  const lightMesh = new THREE.Mesh(lightGeometry, lightMaterial);
+  const sun = new THREE.Mesh(lightGeometry, lightMaterial);
 
-  const pointLight = new THREE.PointLight(0xff0000, strength, 0, 1);
-
+  // Place in (0, 0, 0) if negative values
   if (position) {
-    sun.position.copy(position);
-    lightMesh.position.set(position.x, position.y, position.z);
-    pointLight.position.set(position.x, position.y, position.z);
+    sun.position.set(position.x, position.y, position.z);
   }
-
-  sun.add(lightMesh);
-  sun.add(pointLight);
 
   return sun;
 }
 
-export function createPlanet(mountainHeight) {
-  const geometry = new THREE.SphereGeometry(1, 64, 64);
-  const vertices = geometry.attributes.position;
+export function createPlanet() {
+  const vertexShader = /*glsl*/ `
+    
+  varying vec3 vNormal;
+  uniform float terrainHeight;
+  uniform float terrainFreq;
 
-  for (let i = 0; i < vertices.count; i++) {
-    const vertex = new THREE.Vector3(
-      vertices.getX(i),
-      vertices.getY(i),
-      vertices.getZ(i)
-    );
-    const noiseValue = noise.simplex3(
-      vertex.x * 1.5,
-      vertex.y * 1.5,
-      vertex.z * 1.5
-    );
-
-    // Adjust vertex position based on noise value and mountain height
-    const mountainOffset = mountainHeight * noiseValue;
-    vertex.normalize().multiplyScalar(1 + mountainOffset);
-
-    vertices.setXYZ(i, vertex.x, vertex.y, vertex.z);
+  vec3 random3(vec3 st) {
+    st = vec3( dot(st,vec3(127.1,311.7, 543.21)),
+              dot(st,vec3(269.5,183.3, 355.23)),
+              dot(st,vec3(846.34,364.45, 123.65)) ); // Haphazard additional numbers by IR
+    return -1.0 + 2.0*fract(sin(st)*43758.5453123);
   }
 
-  const material = new THREE.MeshStandardMaterial();
+  // Gradient Noise by Inigo Quilez - iq/2013
+  // https://www.shadertoy.com/view/XdXGW8
+  // Trivially extended to 3D by Ingemar
+  float noise(vec3 st) {
+    vec3 i = floor(st);
+    vec3 f = fract(st);
+
+    vec3 u = f*f*(3.0-2.0*f);
+
+    return mix(
+      mix( mix( dot( random3(i + vec3(0.0,0.0,0.0) ), f - vec3(0.0,0.0,0.0) ),
+        dot( random3(i + vec3(1.0,0.0,0.0) ), f - vec3(1.0,0.0,0.0) ), u.x),
+      mix( dot( random3(i + vec3(0.0,1.0,0.0) ), f - vec3(0.0,1.0,0.0) ),
+        dot( random3(i + vec3(1.0,1.0,0.0) ), f - vec3(1.0,1.0,0.0) ), u.x), u.y),
+
+      mix( mix( dot( random3(i + vec3(0.0,0.0,1.0) ), f - vec3(0.0,0.0,1.0) ),
+        dot( random3(i + vec3(1.0,0.0,1.0) ), f - vec3(1.0,0.0,1.0) ), u.x),
+      mix( dot( random3(i + vec3(0.0,1.0,1.0) ), f - vec3(0.0,1.0,1.0) ),
+        dot( random3(i + vec3(1.0,1.0,1.0) ), f - vec3(1.0,1.0,1.0) ), u.x), u.y), u.z
+      );
+  }
+    
+  void main() {
+    vNormal = normal;
+
+    // Simple planet-like displacement
+    float displacement = noise(position * terrainFreq) * terrainHeight;
+    vec3 modifiedPosition = position + normal * displacement;
+
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(modifiedPosition, 1.0);
+  }`;
+
+  const fragmentShader = /*glsl*/ `
+    varying vec3 vNormal;
+
+    void main() {
+        // Simple lighting effect
+        vec3 light = vec3(1.0, 1.0, 1.0); // light direction
+        float brightness = dot(normalize(vNormal), light);
+        gl_FragColor = vec4(brightness, brightness, brightness, 1.0);
+    }`;
+
+  let terrainHeightVal = 0.2;
+  let terrianFreqVal = 5.0;
+
+  const material = new THREE.ShaderMaterial({
+    uniforms: {
+      terrainHeight: { value: terrainHeightVal },
+      terrainFreq: { value: terrianFreqVal },
+    },
+    vertexShader: vertexShader,
+    fragmentShader: fragmentShader,
+  });
+
+  const geometry = new THREE.SphereGeometry(1, 128, 128);
   const planet = new THREE.Mesh(geometry, material);
+
   return planet;
 }
 
-export function setupGUI(updatePlanetGeometry) {
+export function setupGUI(material) {
   const gui = new dat.GUI();
   const controlsFolder = gui.addFolder("Controls");
 
-  let mountainHeight = 0.5;
+  let terrainHeightVal = 0.5;
+  let terrainFreqVal = 5.0;
 
   controlsFolder
-    .add({ mountainHeight: mountainHeight }, "mountainHeight", 0, 2)
-    .name("Mountain Height")
+    .add({ terrainHeight: terrainHeightVal }, "terrainHeight", 0, 2)
+    .name("Terrain Height")
     .onChange((value) => {
-      updatePlanetGeometry(value); // Pass only the mountainHeight
+      material.uniforms.terrainHeight.value = value;
+    });
+
+  controlsFolder
+    .add({ terrainFreq: terrainFreqVal }, "terrainFreq", 0, 10)
+    .name("Terrain Frequency")
+    .onChange((value) => {
+      material.uniforms.terrainFreq.value = value;
     });
 
   controlsFolder.open();
 }
 
 export function createStars() {
-  // Load a texture for the star
+  // Loads a texture for the stars
   const textureLoader = new THREE.TextureLoader();
   const starTexture = textureLoader.load("images/starBillboard.png");
 
-  // Create billboards (stars)
-  const numberOfStars = 1000; // Change this to the desired number of stars
+  // Creates billboards (stars)
+  const numberOfStars = 2000;
   const stars = new THREE.Group();
 
-  const maxDistance = 2500; // Set the maximum distance from the center
+  const maxDistance = 1000;
 
   for (let i = 0; i < numberOfStars; i++) {
     const starMaterial = new THREE.SpriteMaterial({
       map: starTexture,
-      color: 0xffffff, // You can set a color if needed
+      color: 0xffffff,
       transparent: true,
-      blending: THREE.AdditiveBlending, // Adjust blending mode as desired
+      blending: THREE.AdditiveBlending,
     });
 
     const star = new THREE.Sprite(starMaterial);
-    star.scale.set(1.5, 1.5, 1.5); // Set the initial scale of the stars
+    star.scale.set(1.1, 1.1, 1.1);
 
     // Set random positions for stars away from the center of the scene
     const x = (Math.random() - 0.5) * 2 * maxDistance;
@@ -127,7 +169,6 @@ export function createStars() {
 
     star.position.set(x, y, z);
 
-    // Add the star to the group
     stars.add(star);
   }
 
