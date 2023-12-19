@@ -3,8 +3,9 @@ import {
   createSun,
   createPlanet,
   setupSceneAndControls,
-  setupGUI,
+  //setupGUI,
   createStars,
+  updateSpecularReflection,
 } from "./functions.js";
 
 // Boilerplate code - made into a function
@@ -24,15 +25,17 @@ const stars = createStars();
 scene.add(stars);
 
 // Create the planet (parameters will be changed in gui)
-let planet = createPlanet();
+let planet = createPlanet(camera);
 scene.add(planet);
 
 // Creates the UI for interaction
-setupGUI(planet.material);
+//setupGUI(planet.material);
 
 // Animation function
 function animate() {
   requestAnimationFrame(animate);
+
+  updateSpecularReflection(planet, camera);
 
   controls.update();
   renderer.render(scene, camera);
