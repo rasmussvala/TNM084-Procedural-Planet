@@ -5,7 +5,7 @@ import {
   setupSceneAndControls,
   setupGUI,
   createStars,
-  updateSpecularReflection,
+  // updateSpecularReflection,
 } from "./functions.js";
 
 // Boilerplate code - made into a function
@@ -34,8 +34,6 @@ setupGUI(planet.material);
 // Animation function
 function animate() {
   requestAnimationFrame(animate);
-
-  updateSpecularReflection(planet, camera);
 
   controls.update();
   renderer.render(scene, camera);

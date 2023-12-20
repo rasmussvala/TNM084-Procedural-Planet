@@ -159,11 +159,6 @@ export function createPlanet(camera) {
   varying vec3 vNormal;  // Surface normal
   varying vec3 vPosition;  // Vertex position
 
-  // Camera Position
-  uniform float cameraPositionX; 
-  uniform float cameraPositionY; 
-  uniform float cameraPositionZ; 
-
   uniform float Ka;   // Ambient reflection coefficient
   uniform float Kd;   // Diffuse reflection coefficient
   uniform float Ks;   // Specular reflection coefficient
@@ -197,19 +192,12 @@ export function createPlanet(camera) {
                 Ks * specular * specularColor, 1.0);
   }
   
-  void main() {
-
-    vec3 cameraPosition = vec3(cameraPositionX, cameraPositionY, cameraPositionZ);
-    
+  void main() {    
     gl_FragColor = phongShading();
-  
   }`;
 
   const material = new THREE.ShaderMaterial({
     uniforms: {
-      cameraPositionX: { value: camera.position.x },
-      cameraPositionY: { value: camera.position.y },
-      cameraPositionZ: { value: camera.position.z },
       Ka: { value: planetConfig.phong.Ka },
       Kd: { value: planetConfig.phong.Kd },
       Ks: { value: planetConfig.phong.Ks },
@@ -398,11 +386,4 @@ export function createStars() {
   }
 
   return stars;
-}
-
-export function updateSpecularReflection(planet, camera) {
-  // Copy the value of camera to shader
-  planet.material.uniforms.cameraPositionX.value = camera.position.x;
-  planet.material.uniforms.cameraPositionY.value = camera.position.y;
-  planet.material.uniforms.cameraPositionZ.value = camera.position.z;
 }
