@@ -35,8 +35,8 @@ export function setupSceneAndControls() {
   document.body.appendChild(renderer.domElement);
 
   const controls = new OrbitControls(camera, renderer.domElement);
-  controls.autoRotate = true;
-  controls.autoRotateSpeed = 0.5;
+  // controls.autoRotate = true;
+  // controls.autoRotateSpeed = 0.2;
   controls.enableDamping = true;
 
   // Set initial camera position and update controls
@@ -62,7 +62,7 @@ export function createSun(position, size) {
   return sun;
 }
 
-export function createPlanet(camera) {
+export function createPlanet() {
   // ********** VERTEX SHADER **********
   const vertexShader = /*glsl*/ `
     
@@ -128,13 +128,14 @@ export function createPlanet(camera) {
     vec3 p = position;
 
     // Calculate nearby points for the normal
-    float deltaStep = 0.00001;
-    vec3 pN = normalize(p);
+    vec3 pN = normalize(normalMatrix * normal); // normalize(p);
 
     p = pN * fbm(pN);
-
-    vec3 v1 = abs(dot(pN, vec3(1.0, 0.0, 0.0))) < 0.9 ? vec3(1.0, 0.0, 0.0) : vec3(0.0, 1.0, 0.0);
-
+    
+    vec3 v1 = mix(vec3(0.0, 1.0, 0.0), vec3(1.0, 0.0, 0.0), step(0.9, abs(dot(pN, vec3(1.0, 0.0, 0.0)))));
+    
+    float deltaStep = 0.00001;
+    
     v1 = cross(pN, v1);
     vec3 p1 = pN + v1 * deltaStep;
     p1 = p1 * fbm(p1);
@@ -146,9 +147,9 @@ export function createPlanet(camera) {
     // Compute new normal
     vec3 newNormal = normalize(cross((p1 - p), (p2 - p)));
 
-    // Pass the new normal to the fragment shader
+    // Pass the new normal and position to the fragment shader
     vNormal = newNormal;
-    vPosition = pN;
+    vPosition = p;
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
   }`;
@@ -225,18 +226,6 @@ export function setupGUI(material) {
   const gui = new dat.GUI();
   const phongFolder = gui.addFolder("Phong Illumination");
   const terrainFolder = gui.addFolder("Terrain Parameters");
-
-  // Initial values when starting the program
-  let KaVal = 0.05;
-  let KdVal = 0.9;
-  let KsVal = 0.5;
-  let shininessVal = 50.0;
-
-  let octavesVal = 5.0;
-  let lacunarityVal = 2.5;
-  let frequencyVal = 2.5;
-  let amplitudeVal = 0.5;
-  let depthGainVal = 0.5;
 
   phongFolder
     .add(planetConfig.phong, "Ka", 0, 1.0)

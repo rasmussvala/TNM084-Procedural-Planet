@@ -25,7 +25,7 @@ const stars = createStars();
 scene.add(stars);
 
 // Create the planet (parameters will be changed in gui)
-let planet = createPlanet(camera);
+let planet = createPlanet();
 scene.add(planet);
 
 // Creates the UI for interaction
