@@ -2,6 +2,26 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import dat from "dat.gui";
 
+// Central Configuration Object
+const planetConfig = {
+  phong: {
+    Ka: 0.05,
+    Kd: 0.7,
+    Ks: 0.3,
+    shininess: 50.0,
+    ambientColor: new THREE.Color(0.7, 0.3, 0.0),
+    diffuseColor: new THREE.Color(0.7, 0.3, 0.0),
+    specularColor: new THREE.Color(1.0, 0.5, 0.0),
+  },
+  fbm: {
+    octaves: 5.0,
+    lacunarity: 3.0,
+    frequency: 0.9,
+    amplitude: 0.2,
+    depthGain: 0.4,
+  },
+};
+
 export function setupSceneAndControls() {
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(
@@ -50,6 +70,12 @@ export function createPlanet(camera) {
   varying vec3 vNormal;
   varying vec3 vPosition;
 
+  uniform int octaves;
+  uniform float lacunarity;
+  uniform float frequency;
+  uniform float amplitude;
+  uniform float depthGain;
+
   // Random noise
   vec3 random3(vec3 st) {
     st = vec3( dot(st,vec3(127.1,311.7, 543.21)),
@@ -82,18 +108,16 @@ export function createPlanet(camera) {
 
   // Fractal Brownian Noise for surface texture
   float fbm(vec3 st) {
-    int octaves = 10;
-    float lancunarity = 2.0;
-    float frequency = 1.0;
-    vec3 offset = vec3(1.0, 1.0, 1.0);
-    float amplitude = 0.3;
-    float depthGain = 0.3;
-    float height = 1.0;
 
-    for(int i = 0; i < octaves; i++){
-      height += noise(st * frequency + offset) * amplitude;
-      amplitude *= depthGain;
-      frequency *= lancunarity;
+    vec3 offset = vec3(1.0, 1.0, 1.0);
+    float height = 1.0;
+    float localAmplitude = amplitude;
+    float localFrequency = frequency;
+    
+    for (int i = 0; i < octaves; i++) {
+        height += noise(st * localFrequency + offset) * localAmplitude;
+        localAmplitude *= depthGain;
+        localFrequency *= lacunarity;
     }
 
     return height;
@@ -140,16 +164,18 @@ export function createPlanet(camera) {
   uniform float cameraPositionY; 
   uniform float cameraPositionZ; 
 
-  vec4 phongShading() {
-    float Ka = 0.1;   // Ambient reflection coefficient
-    float Kd = 0.5;   // Diffuse reflection coefficient
-    float Ks = 1.0;   // Specular reflection coefficient
-    float shininessValue = 80.0; // Shininess
+  uniform float Ka;   // Ambient reflection coefficient
+  uniform float Kd;   // Diffuse reflection coefficient
+  uniform float Ks;   // Specular reflection coefficient
+  uniform float shininess; // Shininess
 
-    // Material color
-    vec3 ambientColor = vec3(1.0, 1.0, 1.0);
-    vec3 diffuseColor = vec3(1.0, 1.0, 1.0);
-    vec3 specularColor = vec3(1.0, 1.0, 1.0);
+  // Material color
+  uniform vec3 ambientColor;
+  uniform vec3 diffuseColor;
+  uniform vec3 specularColor;
+  
+  vec4 phongShading() {
+
     vec3 lightPosition = vec3(10.0, 10.0, 10.0); // Light position
 
     vec3 N = normalize(vNormal);
@@ -163,7 +189,7 @@ export function createPlanet(camera) {
       vec3 V = normalize(cameraPosition - vPosition); // Vector to viewer
       // Compute the specular term
       float specularAngle = max(dot(R, V), 0.0);
-      specular = pow(specularAngle, shininessValue);
+      specular = pow(specularAngle, shininess);
     }
 
     return vec4(Ka * ambientColor +
@@ -184,40 +210,160 @@ export function createPlanet(camera) {
       cameraPositionX: { value: camera.position.x },
       cameraPositionY: { value: camera.position.y },
       cameraPositionZ: { value: camera.position.z },
+      Ka: { value: planetConfig.phong.Ka },
+      Kd: { value: planetConfig.phong.Kd },
+      Ks: { value: planetConfig.phong.Ks },
+      shininess: { value: planetConfig.phong.shininess },
+      ambientColor: { value: planetConfig.phong.ambientColor },
+      diffuseColor: { value: planetConfig.phong.diffuseColor },
+      specularColor: { value: planetConfig.phong.specularColor },
+      octaves: { value: planetConfig.fbm.octaves },
+      lacunarity: { value: planetConfig.fbm.lacunarity },
+      frequency: { value: planetConfig.fbm.frequency },
+      amplitude: { value: planetConfig.fbm.amplitude },
+      depthGain: { value: planetConfig.fbm.depthGain },
     },
     vertexShader: vertexShader,
     fragmentShader: fragmentShader,
   });
 
-  const geometry = new THREE.SphereGeometry(1, 256, 256);
+  const geometry = new THREE.SphereGeometry(1, 512, 512);
   const planet = new THREE.Mesh(geometry, material);
 
   return planet;
 }
 
-// export function setupGUI(material) {
-//   const gui = new dat.GUI();
-//   const controlsFolder = gui.addFolder("Controls");
+export function setupGUI(material) {
+  const gui = new dat.GUI();
+  const phongFolder = gui.addFolder("Phong Illumination");
+  const terrainFolder = gui.addFolder("Terrain Parameters");
 
-//   let terrainHeightVal = 0.5;
-//   let terrainFreqVal = 5.0;
+  // Initial values when starting the program
+  let KaVal = 0.05;
+  let KdVal = 0.9;
+  let KsVal = 0.5;
+  let shininessVal = 50.0;
 
-//   controlsFolder
-//     .add({ terrainHeight: terrainHeightVal }, "terrainHeight", 0, 2)
-//     .name("Terrain Height")
-//     .onChange((value) => {
-//       material.uniforms.terrainHeight.value = value;
-//     });
+  let octavesVal = 5.0;
+  let lacunarityVal = 2.5;
+  let frequencyVal = 2.5;
+  let amplitudeVal = 0.5;
+  let depthGainVal = 0.5;
 
-//   controlsFolder
-//     .add({ terrainFreq: terrainFreqVal }, "terrainFreq", 0, 10)
-//     .name("Terrain Frequency")
-//     .onChange((value) => {
-//       material.uniforms.terrainFreq.value = value;
-//     });
+  phongFolder
+    .add(planetConfig.phong, "Ka", 0, 1.0)
+    .name("Ka")
+    .onChange((value) => {
+      material.uniforms.Ka.value = value;
+      planetConfig.phong.Ka = value; // Update config
+    });
 
-//   controlsFolder.open();
-// }
+  phongFolder
+    .add(planetConfig.phong, "Kd", 0, 1.0)
+    .name("Kd")
+    .onChange((value) => {
+      material.uniforms.Kd.value = value;
+      planetConfig.phong.Kd = value; // Update config
+    });
+
+  phongFolder
+    .add(planetConfig.phong, "Ks", 0, 1.0)
+    .name("Ks")
+    .onChange((value) => {
+      material.uniforms.Ks.value = value;
+      planetConfig.phong.Ks = value; // Update config
+    });
+
+  phongFolder
+    .add(planetConfig.phong, "shininess", 0.1, 100.0)
+    .name("Shininess")
+    .onChange((value) => {
+      material.uniforms.shininess.value = value;
+      planetConfig.phong.shininess = value; // Update config
+    });
+
+  phongFolder
+    .addColor(planetConfig.phong, "ambientColor")
+    .name("Ambient Color")
+    .onChange((value) => {
+      const vecColor = new THREE.Color(
+        value.r / 255.0,
+        value.g / 255.0,
+        value.b / 255.0
+      );
+
+      material.uniforms.ambientColor.value = vecColor;
+    });
+
+  phongFolder
+    .addColor(planetConfig.phong, "diffuseColor")
+    .name("Diffuse Color")
+    .onChange((value) => {
+      const vecColor = new THREE.Color(
+        value.r / 255.0,
+        value.g / 255.0,
+        value.b / 255.0
+      );
+
+      material.uniforms.diffuseColor.value = vecColor;
+    });
+
+  phongFolder
+    .addColor(planetConfig.phong, "specularColor")
+    .name("Specular Color")
+    .onChange((value) => {
+      const vecColor = new THREE.Color(
+        value.r / 255.0,
+        value.g / 255.0,
+        value.b / 255.0
+      );
+
+      material.uniforms.specularColor.value = vecColor;
+    });
+
+  terrainFolder
+    .add(planetConfig.fbm, "octaves", 0, 5.0)
+    .name("Octaves")
+    .onChange((value) => {
+      material.uniforms.octaves.value = value;
+      planetConfig.fbm.octaves = value; // Update config
+    });
+
+  terrainFolder
+    .add(planetConfig.fbm, "lacunarity", 0, 5.0)
+    .name("Lacunarity")
+    .onChange((value) => {
+      material.uniforms.lacunarity.value = value;
+      planetConfig.fbm.lacunarity = value; // Update config
+    });
+
+  terrainFolder
+    .add(planetConfig.fbm, "frequency", 0, 5.0)
+    .name("Frequency")
+    .onChange((value) => {
+      material.uniforms.frequency.value = value;
+      planetConfig.fbm.frequency = value; // Update config
+    });
+
+  terrainFolder
+    .add(planetConfig.fbm, "amplitude", 0, 1.0)
+    .name("Amplitude")
+    .onChange((value) => {
+      material.uniforms.amplitude.value = value;
+      planetConfig.fbm.amplitude = value; // Update config
+    });
+
+  terrainFolder
+    .add(planetConfig.fbm, "depthGain", 0, 1.0)
+    .name("Depth Gain")
+    .onChange((value) => {
+      material.uniforms.depthGain.value = value;
+      planetConfig.fbm.depthGain = value; // Update config
+    });
+
+  phongFolder.open();
+  terrainFolder.open();
+}
 
 export function createStars() {
   // Loads a texture for the stars

@@ -3,7 +3,7 @@ import {
   createSun,
   createPlanet,
   setupSceneAndControls,
-  //setupGUI,
+  setupGUI,
   createStars,
   updateSpecularReflection,
 } from "./functions.js";
@@ -29,7 +29,7 @@ let planet = createPlanet(camera);
 scene.add(planet);
 
 // Creates the UI for interaction
-//setupGUI(planet.material);
+setupGUI(planet.material);
 
 // Animation function
 function animate() {
