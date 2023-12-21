@@ -5,7 +5,6 @@ import {
   setupSceneAndControls,
   setupGUI,
   createStars,
-  // updateSpecularReflection,
 } from "./functions.js";
 
 // Boilerplate code - made into a function

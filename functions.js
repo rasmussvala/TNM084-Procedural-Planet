@@ -11,7 +11,7 @@ const planetConfig = {
     shininess: 50.0,
     ambientColor: new THREE.Color(0.7, 0.3, 0.0),
     diffuseColor: new THREE.Color(0.7, 0.3, 0.0),
-    specularColor: new THREE.Color(1.0, 0.5, 0.0),
+    specularColor: new THREE.Color(1.0, 1.0, 1.0),
   },
   fbm: {
     octaves: 5.0,
@@ -19,6 +19,15 @@ const planetConfig = {
     frequency: 0.9,
     amplitude: 0.2,
     depthGain: 0.4,
+  },
+  layers: {
+    layer1Threshold: 0.8,
+    layer2Threshold: 0.7,
+    layer3Threshold: 0.6,
+    maxPlanetRadius: 3.0,
+    layer1Color: new THREE.Color(1.0, 0.0, 0.0),
+    layer2Color: new THREE.Color(0.0, 1.0, 0.0),
+    layer3Color: new THREE.Color(0.0, 0.0, 1.0),
   },
 };
 
@@ -169,6 +178,36 @@ export function createPlanet() {
   uniform vec3 ambientColor;
   uniform vec3 diffuseColor;
   uniform vec3 specularColor;
+
+  // Define thresholds for elevation of different layers
+  uniform float layer1Threshold; 
+  uniform float layer2Threshold; 
+  uniform float layer3Threshold; 
+  uniform float maxPlanetRadius;
+  
+  // Define colors for different layers
+  uniform vec3 layer1Color; 
+  uniform vec3 layer2Color; 
+  uniform vec3 layer3Color; 
+
+  vec3 layerColor() {
+    
+    float distanceToCore = length(vec3(0.0, 0.0, 0.0) - vPosition);
+
+    // Normalize the distance to be between 0 and 1
+    float normalizedDistance = distanceToCore / maxPlanetRadius;
+
+    // Determine the blend factors based on distance for each layer
+    float layer1Factor = smoothstep(layer2Threshold, layer1Threshold, normalizedDistance);
+    float layer2Factor = smoothstep(layer3Threshold, layer2Threshold, normalizedDistance);
+    float layer3Factor = smoothstep(0.0, layer3Threshold, normalizedDistance);   
+
+    // Interpolate between different layers based on distance
+    vec3 finalColor = mix(layer3Color, layer2Color, layer3Factor);
+    finalColor = mix(finalColor, layer1Color, layer2Factor);
+
+    return finalColor;
+  }
   
   vec4 phongShading() {
 
@@ -189,7 +228,7 @@ export function createPlanet() {
     }
 
     return vec4(Ka * ambientColor +
-                Kd * lambertian * diffuseColor +
+                Kd * lambertian * layerColor() +
                 Ks * specular * specularColor, 1.0);
   }
   
@@ -206,11 +245,20 @@ export function createPlanet() {
       ambientColor: { value: planetConfig.phong.ambientColor },
       diffuseColor: { value: planetConfig.phong.diffuseColor },
       specularColor: { value: planetConfig.phong.specularColor },
+
       octaves: { value: planetConfig.fbm.octaves },
       lacunarity: { value: planetConfig.fbm.lacunarity },
       frequency: { value: planetConfig.fbm.frequency },
       amplitude: { value: planetConfig.fbm.amplitude },
       depthGain: { value: planetConfig.fbm.depthGain },
+
+      layer1Threshold: { value: planetConfig.layers.layer1Threshold },
+      layer2Threshold: { value: planetConfig.layers.layer2Threshold },
+      layer3Threshold: { value: planetConfig.layers.layer3Threshold },
+      maxPlanetRadius: { value: planetConfig.layers.maxPlanetRadius },
+      layer1Color: { value: planetConfig.layers.layer1Color },
+      layer2Color: { value: planetConfig.layers.layer2Color },
+      layer3Color: { value: planetConfig.layers.layer3Color },
     },
     vertexShader: vertexShader,
     fragmentShader: fragmentShader,
@@ -226,6 +274,7 @@ export function setupGUI(material) {
   const gui = new dat.GUI();
   const phongFolder = gui.addFolder("Phong Illumination");
   const terrainFolder = gui.addFolder("Terrain Parameters");
+  const layersFolder = gui.addFolder("Layer Controls");
 
   phongFolder
     .add(planetConfig.phong, "Ka", 0, 1.0)
@@ -323,7 +372,7 @@ export function setupGUI(material) {
     });
 
   terrainFolder
-    .add(planetConfig.fbm, "amplitude", 0, 1.0)
+    .add(planetConfig.fbm, "amplitude", 0, 5.0)
     .name("Amplitude")
     .onChange((value) => {
       material.uniforms.amplitude.value = value;
@@ -338,8 +387,73 @@ export function setupGUI(material) {
       planetConfig.fbm.depthGain = value; // Update config
     });
 
+  layersFolder
+    .add(planetConfig.layers, "layer2Threshold", 0, 1.0)
+    .name("Threshold 1")
+    .onChange((value) => {
+      material.uniforms.layer2Threshold.value = value;
+      planetConfig.layers.layer2Threshold = value; // Update config
+    });
+
+  layersFolder
+    .add(planetConfig.layers, "layer3Threshold", 0, 1.0)
+    .name("Threshold 2")
+    .onChange((value) => {
+      material.uniforms.layer3Threshold.value = value;
+      planetConfig.layers.layer3Threshold = value; // Update config
+    });
+
+  layersFolder
+    .add(planetConfig.layers, "maxPlanetRadius", 0, 5.0)
+    .name("Max Planet Radius")
+    .onChange((value) => {
+      material.uniforms.maxPlanetRadius.value = value;
+      planetConfig.layers.maxPlanetRadius = value; // Update config
+    });
+
+  layersFolder
+    .addColor(planetConfig.layers, "layer1Color")
+    .name("Layer 1 Color")
+    .onChange((value) => {
+      const vecColor = new THREE.Color(
+        value.r / 255.0,
+        value.g / 255.0,
+        value.b / 255.0
+      );
+
+      material.uniforms.layer1Color.value = vecColor;
+    });
+
+  layersFolder
+    .addColor(planetConfig.layers, "layer2Color")
+    .name("Layer 2 Color")
+    .onChange((value) => {
+      const vecColor = new THREE.Color(
+        value.r / 255.0,
+        value.g / 255.0,
+        value.b / 255.0
+      );
+
+      material.uniforms.layer2Color.value = vecColor;
+    });
+
+  layersFolder
+    .addColor(planetConfig.layers, "layer3Color")
+    .name("Layer 3 Color")
+    .onChange((value) => {
+      const vecColor = new THREE.Color(
+        value.r / 255.0,
+        value.g / 255.0,
+        value.b / 255.0
+      );
+
+      material.uniforms.layer3Color.value = vecColor;
+    });
+
+
   phongFolder.open();
   terrainFolder.open();
+  layersFolder.open();
 }
 
 export function createStars() {
