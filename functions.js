@@ -6,9 +6,9 @@ import dat from "dat.gui";
 const planetConfig = {
   phong: {
     Ka: 0.05,
-    Kd: 0.7,
-    Ks: 0.3,
-    shininess: 50.0,
+    Kd: 0.8,
+    Ks: 0.01,
+    shininess: 30.0,
     ambientColor: new THREE.Color(0.7, 0.3, 0.0),
     diffuseColor: new THREE.Color(0.7, 0.3, 0.0),
     specularColor: new THREE.Color(1.0, 1.0, 1.0),
@@ -16,18 +16,29 @@ const planetConfig = {
   fbm: {
     octaves: 5.0,
     lacunarity: 3.0,
-    frequency: 0.9,
-    amplitude: 0.2,
+    frequency: 1.6,
+    amplitude: 0.5,
     depthGain: 0.4,
   },
   layers: {
     layer1Threshold: 0.8,
-    layer2Threshold: 0.7,
-    layer3Threshold: 0.6,
+    layer2Threshold: 0.5,
+    layer3Threshold: 0.3,
     maxPlanetRadius: 3.0,
-    layer1Color: new THREE.Color(1.0, 0.0, 0.0),
-    layer2Color: new THREE.Color(0.0, 1.0, 0.0),
-    layer3Color: new THREE.Color(0.0, 0.0, 1.0),
+    layer1Color: new THREE.Color(1.0, 1.0, 1.0),
+    layer2Color: new THREE.Color(0.02, 0.4, 0.02),
+    layer3Color: new THREE.Color(1.0, 1.0, 1.0),
+  },
+};
+
+const waterConfig = {
+  water: {
+    timeScale: 0.0001,
+    waveFrequency: 10.0,
+    waveAmplitude: 1.0,
+    waterAmbient: new THREE.Color(0.1, 0.3, 0.8),
+    waterDiffuse: new THREE.Color(0.1, 0.3, 0.8),
+    waterSpecular: new THREE.Color(1.0, 1.0, 1.0),
   },
 };
 
@@ -69,6 +80,226 @@ export function createSun(position, size) {
   }
 
   return sun;
+}
+
+export function createWaterSphere(position, size) {
+
+  // Custom shader for water effect
+  const waterShader = {
+    uniforms: {
+      time: { value: 0 },
+      timeScale: { value: waterConfig.water.timeScale },
+      waveFrequency: { value: waterConfig.water.waveFrequency },
+      waveAmplitude: { value: waterConfig.water.waveAmplitude },
+      waterAmbient: { value: waterConfig.water.waterAmbient },
+      waterDiffuse: { value: waterConfig.water.waterDiffuse },
+      waterSpecular: { value: waterConfig.water.waterSpecular },
+      waterKa: { value: planetConfig.phong.Ka },
+    },
+    vertexShader: /*glsl*/`
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+       
+      uniform float time; 
+      uniform float timeScale;
+      uniform float waveFrequency;
+  
+      vec3 random3(vec3 st) {
+        st = vec3(dot(st, vec3(127.1, 311.7, 171.3)),
+                  dot(st, vec3(269.5, 183.3, 331.6)),
+                  dot(st, vec3(419.2, 371.9, 241.8)));
+        return -1.0 + 2.0 * fract(sin(st) * 43758.5453123);
+      }
+
+      vec3 rot3(vec3 v, float r) {
+        vec3 res;
+
+        res.x = cos(r)*v.x + sin(r)*v.y;
+        res.y = -sin(r)*v.x + cos(r)*v.y;
+        res.z = -cos(r)*v.x + sin(r)*v.y;
+
+        return res;
+      }
+
+      float perlin3DNoise(vec3 st, float r) {
+        vec3 i = floor(st);
+        vec3 f = fract(st);
+        vec3 u = f*f*(3.0-2.0*f);
+
+        return mix(        
+        mix( mix( dot( rot3(random3(i + vec3(0.0,0.0,0.0)), r), f - vec3(0.0,0.0,0.0)),
+        dot( rot3(random3(i + vec3(1.0,0.0,0.0)), r), f - vec3(1.0,0.0,0.0) ), u.x),
+        mix( dot( rot3(random3(i + vec3(0.0,1.0,0.0)), r), f - vec3(0.0,1.0,0.0) ),
+        dot( rot3(random3(i + vec3(1.0,1.0,0.0)), r), f - vec3(1.0,1.0,0.0) ), u.x), u.y),
+        
+        mix( mix( dot( rot3(random3(i + vec3(0.0,0.0,1.0)), r), f - vec3(0.0,0.0,1.0) ),
+        dot( rot3(random3(i + vec3(1.0,0.0,1.0)), r), f - vec3(1.0,0.0,1.0) ), u.x),
+        mix( dot( rot3(random3(i + vec3(0.0,1.0,1.0)), r), f - vec3(0.0,1.0,1.0) ),
+        dot( rot3(random3(i + vec3(1.0,1.0,1.0)), r), f - vec3(1.0,1.0,1.0) ), u.x), u.y), u.z);
+      }
+
+      float fbm(vec3 st) {
+
+        vec3 offset = vec3(1.0, 1.0, 1.0);
+        float height = 1.0;
+        float amplitude = 0.2;
+        float frequency = 0.4;
+        float octaves = 6.0;
+        float depthGain = 0.12;
+        float lacunarity = 8.0;
+        
+        for (float i = 0.0; i < octaves; i++) {
+            height += perlin3DNoise(st * frequency + offset, time * timeScale) * amplitude;
+            amplitude *= depthGain;
+            frequency *= lacunarity + (time * 0.0001);
+        }
+    
+        return height;
+      }
+
+      void main() {
+        
+        // Calculate displacement based on time and vertex position, adjusting by frequency
+        float displacement = perlin3DNoise(position * waveFrequency * 0.01, time * timeScale);
+
+        // Apply displacement to modify vertex position
+        vec3 displacedPosition = position + (normal * displacement * 0.05);    
+
+        // Shader uses Triangle method to calculate normals
+        vec3 p = position;
+    
+        // Calculate nearby points for the normal
+        vec3 pN = normalize(normalMatrix * normal);
+    
+        p = pN * fbm(pN);
+        
+        vec3 v1 = mix(vec3(0.0, 1.0, 0.0), vec3(1.0, 0.0, 0.0), step(0.9, abs(dot(pN, vec3(1.0, 0.0, 0.0)))));
+        
+        float deltaStep = 0.00001;
+        
+        v1 = cross(pN, v1);
+        vec3 p1 = pN + v1 * deltaStep;
+        p1 = p1 * fbm(p1);
+    
+        vec3 v2 = cross(pN, v1);
+        vec3 p2 = pN + v2 * deltaStep;
+        p2 = p2 * fbm(p2);
+    
+        // Compute new normal
+        vec3 newNormal = normalize(cross((p1 - p), (p2 - p)));
+    
+        // Pass the new normal and position to the fragment shader
+        vNormal = newNormal;
+        vPosition = p;
+    
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+      }
+    `,
+    fragmentShader: /*glsl*/`
+      varying vec3 vNormal;  
+      varying vec3 vPosition; 
+
+      uniform float time;
+      uniform float timeScale;
+      uniform float waveAmplitude;
+
+      uniform vec3 waterAmbient;
+      uniform vec3 waterDiffuse; 
+      uniform vec3 waterSpecular; 
+      uniform float waterKa;
+  
+      vec3 random3(vec3 st) {
+        st = vec3(dot(st, vec3(127.1, 311.7, 171.3)),
+                  dot(st, vec3(269.5, 183.3, 331.6)),
+                  dot(st, vec3(419.2, 371.9, 241.8)));
+        return -1.0 + 2.0 * fract(sin(st) * 43758.5453123);
+      }
+
+      vec3 rot3(vec3 v, float r) {
+        vec3 res;
+
+        res.x = cos(r)*v.x + sin(r)*v.y;
+        res.y = -sin(r)*v.x + cos(r)*v.y;
+        res.z = -cos(r)*v.x + sin(r)*v.y;
+
+        return res;
+      }
+
+      float perlin3DNoise(vec3 st, float r) {
+        vec3 i = floor(st);
+        vec3 f = fract(st);
+        vec3 u = f*f*(3.0-2.0*f);
+
+        return mix(        
+        mix( mix( dot( rot3(random3(i + vec3(0.0,0.0,0.0)), r), f - vec3(0.0,0.0,0.0)),
+        dot( rot3(random3(i + vec3(1.0,0.0,0.0)), r), f - vec3(1.0,0.0,0.0) ), u.x),
+        mix( dot( rot3(random3(i + vec3(0.0,1.0,0.0)), r), f - vec3(0.0,1.0,0.0) ),
+        dot( rot3(random3(i + vec3(1.0,1.0,0.0)), r), f - vec3(1.0,1.0,0.0) ), u.x), u.y),
+        
+        mix( mix( dot( rot3(random3(i + vec3(0.0,0.0,1.0)), r), f - vec3(0.0,0.0,1.0) ),
+        dot( rot3(random3(i + vec3(1.0,0.0,1.0)), r), f - vec3(1.0,0.0,1.0) ), u.x),
+        mix( dot( rot3(random3(i + vec3(0.0,1.0,1.0)), r), f - vec3(0.0,1.0,1.0) ),
+        dot( rot3(random3(i + vec3(1.0,1.0,1.0)), r), f - vec3(1.0,1.0,1.0) ), u.x), u.y), u.z);
+      }  
+
+      void main() { 
+
+        float waterKd = 1.0;
+        float waterKs = 1.0;
+        float waterShininess = 60.0;
+  
+        vec3 lightPosition = vec3(10.0, 10.0, 10.0); // Light position
+      
+        vec3 N = normalize(vNormal);
+        vec3 L = normalize(lightPosition - vPosition);
+             
+        // Lambert's cosine law
+        float lambertian = max(dot(N, L), 0.0);
+        float specular = 0.0;
+        if(lambertian > 0.0) {
+        vec3 R = reflect(-L, N);      // Reflected light vector
+        vec3 V = normalize(cameraPosition - vPosition); // Vector to viewer
+        // Compute the specular term
+        float specularAngle = max(dot(R, V), 0.0);
+        specular = pow(specularAngle, waterShininess);
+        }
+        // Calculate wave pattern using the time and position, adjusting by amplitude
+        float waveDisplacement = perlin3DNoise(vPosition, time) * waveAmplitude;
+
+        float waterAlpha = 0.99 + 0.01 * sin(waveDisplacement * 10.0 + time);
+
+        // Example: Apply wave pattern to color
+        vec3 waveColor = waterDiffuse + waterDiffuse * abs(sin(waveDisplacement * 0.5 + time * timeScale));
+
+        gl_FragColor = vec4(waterKa * waterAmbient +
+                            waterKd * lambertian * waveColor +
+                            waterKs * specular * waterSpecular, waterAlpha);
+        
+      }
+    `,
+  };
+
+  const waterGeometry = new THREE.SphereGeometry(size, 512, 512);
+
+  const waterMaterial = new THREE.ShaderMaterial({
+    uniforms: waterShader.uniforms,
+    vertexShader: waterShader.vertexShader,
+    fragmentShader: waterShader.fragmentShader,
+    transparent: true,
+    blending: THREE.NormalBlending,
+    depthTest: true,
+    depthWrite: true,
+  });
+
+  const waterSphere = new THREE.Mesh(waterGeometry, waterMaterial);
+  waterSphere.renderOrder = 0; // Set render order
+
+  // Place at provided position or (0, 0, 0) if not specified
+  if (position) {
+    waterSphere.position.set(position.x, position.y, position.z);
+  }
+
+  return waterSphere;
 }
 
 export function createPlanet() {
@@ -270,10 +501,11 @@ export function createPlanet() {
   return planet;
 }
 
-export function setupGUI(material) {
+export function setupGUI(material, waterMaterial) {
   const gui = new dat.GUI();
   const phongFolder = gui.addFolder("Phong Illumination");
   const terrainFolder = gui.addFolder("Terrain Parameters");
+  const waterFolder = gui.addFolder("Water Parameters");
   const layersFolder = gui.addFolder("Layer Controls");
 
   phongFolder
@@ -281,6 +513,7 @@ export function setupGUI(material) {
     .name("Ka")
     .onChange((value) => {
       material.uniforms.Ka.value = value;
+      waterMaterial.uniforms.waterKa.value = value;
       planetConfig.phong.Ka = value; // Update config
     });
 
@@ -450,9 +683,73 @@ export function setupGUI(material) {
       material.uniforms.layer3Color.value = vecColor;
     });
 
+  waterFolder
+    .add(waterConfig.water, "timeScale", 0, 0.1)
+    .name("Time Scale")
+    .onChange((value) => {
+      waterMaterial.uniforms.timeScale.value = value;
+      waterConfig.water.timeScale = value;
+    });
+
+  waterFolder
+    .add(waterConfig.water, "waveFrequency", 0, 10.0)
+    .name("Wave Frequency")
+    .onChange((value) => {
+      waterMaterial.uniforms.waveFrequency.value = value;
+      waterConfig.water.waveFrequency = value;
+    });
+
+  waterFolder
+    .add(waterConfig.water, "waveAmplitude", 0, 5.0)
+    .name("Wave Amplitude")
+    .onChange((value) => {
+      waterMaterial.uniforms.waveAmplitude.value = value;
+      waterConfig.water.waveAmplitude = value;
+    });
+
+  waterFolder
+    .addColor(waterConfig.water, "waterAmbient")
+    .name("Water Ambient")
+    .onChange((value) => {
+      const vecColor = new THREE.Color(
+        value.r / 255.0,
+        value.g / 255.0,
+        value.b / 255.0
+      );
+
+      waterMaterial.uniforms.waterAmbient.value = vecColor;
+    });
+
+  waterFolder
+    .addColor(waterConfig.water, "waterDiffuse")
+    .name("Water Diffuse")
+    .onChange((value) => {
+      const vecColor = new THREE.Color(
+        value.r / 255.0,
+        value.g / 255.0,
+        value.b / 255.0
+      );
+
+      waterMaterial.uniforms.waterDiffuse.value = vecColor;
+    });
+
+  waterFolder
+    .addColor(waterConfig.water, "waterSpecular")
+    .name("Water Specular")
+    .onChange((value) => {
+      const vecColor = new THREE.Color(
+        value.r / 255.0,
+        value.g / 255.0,
+        value.b / 255.0
+      );
+
+      waterMaterial.uniforms.waterSpecular.value = vecColor;
+    });
+
 
   phongFolder.open();
   terrainFolder.open();
+  waterFolder.open();
   layersFolder.open();
 }
 
