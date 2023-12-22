@@ -11,8 +11,11 @@ import {
 // Boilerplate code - made into a function
 const { scene, camera, renderer, controls } = setupSceneAndControls();
 
-const axesHelper = new THREE.AxesHelper(5);
-scene.add(axesHelper);
+const clock = new THREE.Clock();
+
+// Show axis
+// const axesHelper = new THREE.AxesHelper(5);
+// scene.add(axesHelper);
 
 // Create the sun
 const sunPosition = new THREE.Vector3(10, 10, 10);
@@ -39,9 +42,10 @@ setupGUI(planet.material);
 function animate() {
   requestAnimationFrame(animate);
 
-  clouds.rotation.x += 0.001 * Math.random();
-  clouds.rotation.y += 0.001 * Math.random();
-  clouds.rotation.z += 0.001 * Math.random();
+  const deltaTime = clock.getDelta();
+
+  clouds.rotation.x += 0.02 * deltaTime;
+  clouds.rotation.y += 0.04 * deltaTime;
 
   controls.update();
   renderer.render(scene, camera);
