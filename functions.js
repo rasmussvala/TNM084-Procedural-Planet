@@ -796,54 +796,53 @@ export function createClouds() {
 
   // Loads a texture for the clouds
   const textureLoader = new THREE.TextureLoader();
-  const cloudTexture = textureLoader.load("images/starBillboard.png");
+  const cloudTexture = textureLoader.load("images/cloudBillboard.png");
 
   // Creates the main group for all clouds
   const clouds = new THREE.Group();
 
-  // Number of clouds and sets
-  const numberOfClouds = 150;
+  // Number of potential cloud positions
+  const numberOfCloudPositions = 2000;
   let scale = 1.0; // init
 
+  // Threshold for cloud spawning based on noise
+  const cloudSpawnThreshold = 0.05; // Adjust this as needed
 
-  // Add clouds to the set
-  for (let i = 0; i < numberOfClouds; i++) {
-    const cloudMaterial = new THREE.SpriteMaterial({
-      map: cloudTexture,
-      color: 0xffffff,
-      transparent: true,
-      blending: THREE.AdditiveBlending,
-      side: THREE.DoubleSide,
-      opacity: 0.5
-    });
-
-    const cloud = new THREE.Sprite(cloudMaterial);
-
-    scale = Math.random() * 0.1 + 0.1;
-    cloud.scale.set(scale, scale, scale);
-
-    // Set random positions for clouds within the set
+  // Add clouds based on noise threshold
+  for (let i = 0; i < numberOfCloudPositions; i++) {
     const theta = Math.PI * Math.random();
     const phi = 2 * Math.PI * Math.random();
 
-    let noiseValue = noise.perlin2(
-      theta,
-      phi
-    );
+    const offset = 5.0; // Create different clouds with offset
+    let noiseValue = noise.perlin2(theta + offset, phi + offset);
 
-    // Scale
-    // noiseValue *= 2;
-    noiseValue < 0.5 ? noiseValue += 1.0 : noiseValue;
-    // Convert spherical coordinates to Cartesian coordinates
-    const radius = 1.2 + (Math.random() * 0.1); // Adjust the radius for individual clouds
-    const x = radius * Math.sin(phi * noiseValue) * Math.cos(theta * noiseValue);
-    const y = radius * Math.sin(phi * noiseValue) * Math.sin(theta * noiseValue);
-    const z = radius * Math.cos(phi * noiseValue);
+    // Only create a cloud if the noise value exceeds the threshold
+    if (noiseValue > cloudSpawnThreshold) {
+      const cloudMaterial = new THREE.SpriteMaterial({
+        map: cloudTexture,
+        color: 0xffffff,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        side: THREE.DoubleSide,
+        opacity: Math.random(),
+      });
 
-    cloud.position.set(x, y, z);
+      const cloud = new THREE.Sprite(cloudMaterial);
 
-    // Add the cloud to the main clouds group
-    clouds.add(cloud);
+      scale = Math.random() * 0.1 + 0.2;
+      cloud.scale.set(scale, scale, scale);
+
+      // Convert spherical coordinates to Cartesian coordinates
+      const radius = 1.1 + Math.random() * 0.1;
+      const x = radius * Math.sin(phi) * Math.cos(theta);
+      const y = radius * Math.sin(phi) * Math.sin(theta);
+      const z = radius * Math.cos(phi);
+
+      cloud.position.set(x, y, z);
+
+      // Add the cloud to the main clouds group
+      clouds.add(cloud);
+    }
   }
 
   return clouds;

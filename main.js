@@ -12,10 +12,11 @@ import {
 // Boilerplate code - made into a function
 const { scene, camera, renderer, controls } = setupSceneAndControls();
 
-const axesHelper = new THREE.AxesHelper(5);
-scene.add(axesHelper);
+const clock = new THREE.Clock();
 
-let clock = new THREE.Clock();
+// Show axis
+// const axesHelper = new THREE.AxesHelper(5);
+// scene.add(axesHelper);
 
 // Create the sun
 const sunPosition = new THREE.Vector3(10, 10, 10);
