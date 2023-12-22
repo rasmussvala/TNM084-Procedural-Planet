@@ -1,6 +1,10 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import dat from "dat.gui";
+import { Noise } from "noisejs"; // https://github.com/josephg/noisejs - stegu noise
+
+// Initialize a random seed for the noise
+const noise = new Noise(Math.random());
 
 // Central Configuration Object
 const planetConfig = {
@@ -491,6 +495,8 @@ export function createStars() {
 }
 
 export function createClouds() {
+  noise.seed(1);
+
   // Loads a texture for the clouds
   const textureLoader = new THREE.TextureLoader();
   const cloudTexture = textureLoader.load("images/starBillboard.png");
@@ -499,46 +505,48 @@ export function createClouds() {
   const clouds = new THREE.Group();
 
   // Number of clouds and sets
-  const numberOfClouds = 100;
-  const cloudsPerSet = 10;
-  const numberOfSets = numberOfClouds / cloudsPerSet;
+  const numberOfClouds = 150;
+  let scale = 1.0; // init
 
-  const cloudGeometry = new THREE.SphereGeometry(1, 16, 16); // Adjust the resolution as needed
 
-  // Create groups for each set of clouds
-  for (let setIndex = 0; setIndex < numberOfSets; setIndex++) {
-    const cloudSet = new THREE.Group();
+  // Add clouds to the set
+  for (let i = 0; i < numberOfClouds; i++) {
+    const cloudMaterial = new THREE.SpriteMaterial({
+      map: cloudTexture,
+      color: 0xffffff,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide,
+      opacity: 0.5
+    });
 
-    // Add clouds to the set
-    for (let i = 0; i < cloudsPerSet; i++) {
-      const cloudMaterial = new THREE.MeshBasicMaterial({
-        map: cloudTexture,
-        color: 0xffffff,
-        transparent: true,
-        blending: THREE.AdditiveBlending,
-        side: THREE.DoubleSide,
-      });
+    const cloud = new THREE.Sprite(cloudMaterial);
 
-      const cloud = new THREE.Mesh(cloudGeometry, cloudMaterial);
-      cloud.scale.set(0.1, 0.1, 0.1);
+    scale = Math.random() * 0.1 + 0.1;
+    cloud.scale.set(scale, scale, scale);
 
-      // Set random positions for clouds within the set
-      const theta = (20 * Math.PI * i * Math.random()) / cloudsPerSet;
-      const phi = Math.acos(2 * Math.random() - 1);
+    // Set random positions for clouds within the set
+    const theta = Math.PI * Math.random();
+    const phi = 2 * Math.PI * Math.random();
 
-      // Convert spherical coordinates to Cartesian coordinates
-      const radius = 1; // Adjust the radius for individual clouds within the set
-      const x = radius * Math.sin(phi) * Math.cos(theta);
-      const y = radius * Math.sin(phi) * Math.sin(theta);
-      const z = radius * Math.cos(phi);
+    let noiseValue = noise.perlin2(
+      theta,
+      phi
+    );
 
-      cloud.position.set(x, y, z);
+    // Scale
+    // noiseValue *= 2;
+    noiseValue < 0.5 ? noiseValue += 1.0 : noiseValue;
+    // Convert spherical coordinates to Cartesian coordinates
+    const radius = 1.2 + (Math.random() * 0.1); // Adjust the radius for individual clouds
+    const x = radius * Math.sin(phi * noiseValue) * Math.cos(theta * noiseValue);
+    const y = radius * Math.sin(phi * noiseValue) * Math.sin(theta * noiseValue);
+    const z = radius * Math.cos(phi * noiseValue);
 
-      cloudSet.add(cloud);
-    }
+    cloud.position.set(x, y, z);
 
-    // Add the set to the main clouds group
-    clouds.add(cloudSet);
+    // Add the cloud to the main clouds group
+    clouds.add(cloud);
   }
 
   return clouds;
