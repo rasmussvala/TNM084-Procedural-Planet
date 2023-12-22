@@ -5,6 +5,7 @@ import {
   setupSceneAndControls,
   setupGUI,
   createStars,
+  createClouds,
 } from "./functions.js";
 
 // Boilerplate code - made into a function
@@ -27,12 +28,20 @@ scene.add(stars);
 let planet = createPlanet();
 scene.add(planet);
 
+// Creates clouds
+const clouds = createClouds();
+scene.add(clouds);
+
 // Creates the UI for interaction
 setupGUI(planet.material);
 
 // Animation function
 function animate() {
   requestAnimationFrame(animate);
+
+  clouds.rotation.x += 0.001 * Math.random();
+  clouds.rotation.y += 0.001 * Math.random();
+  clouds.rotation.z += 0.001 * Math.random();
 
   controls.update();
   renderer.render(scene, camera);

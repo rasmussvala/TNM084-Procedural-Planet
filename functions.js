@@ -147,17 +147,16 @@ export function createPlanet() {
     
     v1 = cross(pN, v1);
     vec3 p1 = pN + v1 * deltaStep;
-    p1 = p1 * fbm(p1);
+    p1 *= fbm(p1);
 
     vec3 v2 = cross(pN, v1);
     vec3 p2 = pN + v2 * deltaStep;
-    p2 = p2 * fbm(p2);
+    p2 *= fbm(p2);
 
-    // Compute new normal
-    vec3 newNormal = normalize(cross((p1 - p), (p2 - p)));
+    // Compute new normal and pass to fragment shader
+    vNormal = normalize(cross((p1 - p), (p2 - p)));
 
-    // Pass the new normal and position to the fragment shader
-    vNormal = newNormal;
+    // Pass the new position to the fragment shader
     vPosition = p;
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
@@ -489,4 +488,58 @@ export function createStars() {
   }
 
   return stars;
+}
+
+export function createClouds() {
+  // Loads a texture for the clouds
+  const textureLoader = new THREE.TextureLoader();
+  const cloudTexture = textureLoader.load("images/starBillboard.png");
+
+  // Creates the main group for all clouds
+  const clouds = new THREE.Group();
+
+  // Number of clouds and sets
+  const numberOfClouds = 100;
+  const cloudsPerSet = 10;
+  const numberOfSets = numberOfClouds / cloudsPerSet;
+
+  const cloudGeometry = new THREE.SphereGeometry(1, 16, 16); // Adjust the resolution as needed
+
+  // Create groups for each set of clouds
+  for (let setIndex = 0; setIndex < numberOfSets; setIndex++) {
+    const cloudSet = new THREE.Group();
+
+    // Add clouds to the set
+    for (let i = 0; i < cloudsPerSet; i++) {
+      const cloudMaterial = new THREE.MeshBasicMaterial({
+        map: cloudTexture,
+        color: 0xffffff,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        side: THREE.DoubleSide,
+      });
+
+      const cloud = new THREE.Mesh(cloudGeometry, cloudMaterial);
+      cloud.scale.set(0.1, 0.1, 0.1);
+
+      // Set random positions for clouds within the set
+      const theta = (20 * Math.PI * i * Math.random()) / cloudsPerSet;
+      const phi = Math.acos(2 * Math.random() - 1);
+
+      // Convert spherical coordinates to Cartesian coordinates
+      const radius = 1; // Adjust the radius for individual clouds within the set
+      const x = radius * Math.sin(phi) * Math.cos(theta);
+      const y = radius * Math.sin(phi) * Math.sin(theta);
+      const z = radius * Math.cos(phi);
+
+      cloud.position.set(x, y, z);
+
+      cloudSet.add(cloud);
+    }
+
+    // Add the set to the main clouds group
+    clouds.add(cloudSet);
+  }
+
+  return clouds;
 }
