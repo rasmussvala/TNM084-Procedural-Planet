@@ -18,7 +18,7 @@ const planetConfig = {
     specularColor: new THREE.Color(1.0, 1.0, 1.0),
   },
   fbm: {
-    octaves: 5.0,
+    octaves: 4.0,
     lacunarity: 3.0,
     frequency: 1.6,
     amplitude: 0.5,
@@ -28,17 +28,20 @@ const planetConfig = {
     layer1Threshold: 0.8,
     layer2Threshold: 0.5,
     layer3Threshold: 0.3,
+    layer4Threshold: 0.2,
+    layer5Threshold: 0.1,
     maxPlanetRadius: 3.0,
     layer1Color: new THREE.Color(1.0, 1.0, 1.0),
     layer2Color: new THREE.Color(0.02, 0.4, 0.02),
     layer3Color: new THREE.Color(1.0, 1.0, 1.0),
+    layer4Color: new THREE.Color(1.0, 1.0, 1.0),
+    layer5Color: new THREE.Color(1.0, 1.0, 1.0),
   },
 };
 
 const waterConfig = {
   water: {
     timeScale: 0.0001,
-    waveFrequency: 10.0,
     waveAmplitude: 1.0,
     waterAmbient: new THREE.Color(0.1, 0.3, 0.8),
     waterDiffuse: new THREE.Color(0.1, 0.3, 0.8),
@@ -87,26 +90,23 @@ export function createSun(position, size) {
 }
 
 export function createWaterSphere(position, size) {
-
   // Custom shader for water effect
   const waterShader = {
     uniforms: {
       time: { value: 0 },
       timeScale: { value: waterConfig.water.timeScale },
-      waveFrequency: { value: waterConfig.water.waveFrequency },
       waveAmplitude: { value: waterConfig.water.waveAmplitude },
       waterAmbient: { value: waterConfig.water.waterAmbient },
       waterDiffuse: { value: waterConfig.water.waterDiffuse },
       waterSpecular: { value: waterConfig.water.waterSpecular },
       waterKa: { value: planetConfig.phong.Ka },
     },
-    vertexShader: /*glsl*/`
+    vertexShader: /*glsl*/ `
       varying vec3 vNormal;
       varying vec3 vPosition;
        
       uniform float time; 
       uniform float timeScale;
-      uniform float waveFrequency;
   
       vec3 random3(vec3 st) {
         st = vec3(dot(st, vec3(127.1, 311.7, 171.3)),
@@ -144,7 +144,6 @@ export function createWaterSphere(position, size) {
 
       float fbm(vec3 st) {
 
-        vec3 offset = vec3(1.0, 1.0, 1.0);
         float height = 1.0;
         float amplitude = 0.2;
         float frequency = 0.4;
@@ -153,7 +152,7 @@ export function createWaterSphere(position, size) {
         float lacunarity = 8.0;
         
         for (float i = 0.0; i < octaves; i++) {
-            height += perlin3DNoise(st * frequency + offset, time * timeScale) * amplitude;
+            height += perlin3DNoise(st * frequency, time * timeScale) * amplitude;
             amplitude *= depthGain;
             frequency *= lacunarity + (time * 0.0001);
         }
@@ -161,19 +160,13 @@ export function createWaterSphere(position, size) {
         return height;
       }
 
-      void main() {
-        
-        // Calculate displacement based on time and vertex position, adjusting by frequency
-        float displacement = perlin3DNoise(position * waveFrequency * 0.01, time * timeScale);
-
-        // Apply displacement to modify vertex position
-        vec3 displacedPosition = position + (normal * displacement * 0.05);    
+      void main() {    
 
         // Shader uses Triangle method to calculate normals
         vec3 p = position;
     
         // Calculate nearby points for the normal
-        vec3 pN = normalize(normalMatrix * normal);
+        vec3 pN = normalize(p);
     
         p = pN * fbm(pN);
         
@@ -199,7 +192,7 @@ export function createWaterSphere(position, size) {
         gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
       }
     `,
-    fragmentShader: /*glsl*/`
+    fragmentShader: /*glsl*/ `
       varying vec3 vNormal;  
       varying vec3 vPosition; 
 
@@ -283,7 +276,7 @@ export function createWaterSphere(position, size) {
     `,
   };
 
-  const waterGeometry = new THREE.SphereGeometry(size, 512, 512);
+  const waterGeometry = new THREE.IcosahedronGeometry(size, 128);
 
   const waterMaterial = new THREE.ShaderMaterial({
     uniforms: waterShader.uniforms,
@@ -353,13 +346,12 @@ export function createPlanet() {
   // Fractal Brownian Noise for surface texture
   float fbm(vec3 st) {
 
-    vec3 offset = vec3(1.0, 1.0, 1.0);
     float height = 1.0;
     float localAmplitude = amplitude;
     float localFrequency = frequency;
     
     for (int i = 0; i < octaves; i++) {
-        height += noise(st * localFrequency + offset) * localAmplitude;
+        height += noise(st * localFrequency) * localAmplitude;
         localAmplitude *= depthGain;
         localFrequency *= lacunarity;
     }
@@ -372,7 +364,7 @@ export function createPlanet() {
     vec3 p = position;
 
     // Calculate nearby points for the normal
-    vec3 pN = normalize(normalMatrix * normal); // normalize(p);
+    vec3 pN = normalize(p); // normalize(p);
 
     p = pN * fbm(pN);
     
@@ -417,12 +409,16 @@ export function createPlanet() {
   uniform float layer1Threshold; 
   uniform float layer2Threshold; 
   uniform float layer3Threshold; 
+  uniform float layer4Threshold;
+  uniform float layer5Threshold;
   uniform float maxPlanetRadius;
   
   // Define colors for different layers
   uniform vec3 layer1Color; 
   uniform vec3 layer2Color; 
   uniform vec3 layer3Color; 
+  uniform vec3 layer4Color;
+  uniform vec3 layer5Color;
 
   vec3 layerColor() {
     
@@ -434,11 +430,15 @@ export function createPlanet() {
     // Determine the blend factors based on distance for each layer
     float layer1Factor = smoothstep(layer2Threshold, layer1Threshold, normalizedDistance);
     float layer2Factor = smoothstep(layer3Threshold, layer2Threshold, normalizedDistance);
-    float layer3Factor = smoothstep(0.0, layer3Threshold, normalizedDistance);   
+    float layer3Factor = smoothstep(layer4Threshold, layer3Threshold, normalizedDistance);
+    float layer4Factor = smoothstep(layer5Threshold, layer4Threshold, normalizedDistance);
+    float layer5Factor = smoothstep(0.0, layer5Threshold, normalizedDistance);   
 
-    // Interpolate between different layers based on distance
-    vec3 finalColor = mix(layer3Color, layer2Color, layer3Factor);
-    finalColor = mix(finalColor, layer1Color, layer2Factor);
+     // Interpolate between different layers based on distance
+     vec3 finalColor = mix(layer5Color, layer4Color, layer5Factor);
+     finalColor = mix(finalColor, layer3Color, layer4Factor);
+     finalColor = mix(finalColor, layer2Color, layer3Factor);
+     finalColor = mix(finalColor, layer1Color, layer2Factor);
 
     return finalColor;
   }
@@ -489,16 +489,20 @@ export function createPlanet() {
       layer1Threshold: { value: planetConfig.layers.layer1Threshold },
       layer2Threshold: { value: planetConfig.layers.layer2Threshold },
       layer3Threshold: { value: planetConfig.layers.layer3Threshold },
+      layer4Threshold: { value: planetConfig.layers.layer4Threshold },
+      layer5Threshold: { value: planetConfig.layers.layer5Threshold },
       maxPlanetRadius: { value: planetConfig.layers.maxPlanetRadius },
       layer1Color: { value: planetConfig.layers.layer1Color },
       layer2Color: { value: planetConfig.layers.layer2Color },
       layer3Color: { value: planetConfig.layers.layer3Color },
+      layer4Color: { value: planetConfig.layers.layer4Color },
+      layer5Color: { value: planetConfig.layers.layer5Color },
     },
     vertexShader: vertexShader,
     fragmentShader: fragmentShader,
   });
 
-  const geometry = new THREE.SphereGeometry(1, 512, 512);
+  const geometry = new THREE.IcosahedronGeometry(1, 256);
   const planet = new THREE.Mesh(geometry, material);
 
   return planet;
@@ -624,19 +628,43 @@ export function setupGUI(material, waterMaterial) {
     });
 
   layersFolder
-    .add(planetConfig.layers, "layer2Threshold", 0, 1.0)
+    .add(planetConfig.layers, "layer1Threshold", 0.0, 1.0)
     .name("Threshold 1")
+    .onChange((value) => {
+      material.uniforms.layer1Threshold.value = value;
+      planetConfig.layers.layer1Threshold = value; // Update config
+    });
+
+  layersFolder
+    .add(planetConfig.layers, "layer2Threshold", 0.0, 1.0)
+    .name("Threshold 2")
     .onChange((value) => {
       material.uniforms.layer2Threshold.value = value;
       planetConfig.layers.layer2Threshold = value; // Update config
     });
 
   layersFolder
-    .add(planetConfig.layers, "layer3Threshold", 0, 1.0)
-    .name("Threshold 2")
+    .add(planetConfig.layers, "layer3Threshold", 0.0, 1.0)
+    .name("Threshold 3")
     .onChange((value) => {
       material.uniforms.layer3Threshold.value = value;
       planetConfig.layers.layer3Threshold = value; // Update config
+    });
+
+  layersFolder
+    .add(planetConfig.layers, "layer4Threshold", 0.0, 1.0)
+    .name("Threshold 4")
+    .onChange((value) => {
+      material.uniforms.layer4Threshold.value = value;
+      planetConfig.layers.layer4Threshold = value; // Update config
+    });
+
+  layersFolder
+    .add(planetConfig.layers, "layer5Threshold", 0.0, 1.0)
+    .name("Threshold 5")
+    .onChange((value) => {
+      material.uniforms.layer5Threshold.value = value;
+      planetConfig.layers.layer5Threshold = value; // Update config
     });
 
   layersFolder
@@ -686,20 +714,38 @@ export function setupGUI(material, waterMaterial) {
       material.uniforms.layer3Color.value = vecColor;
     });
 
+  layersFolder
+    .addColor(planetConfig.layers, "layer4Color")
+    .name("Layer 4 Color")
+    .onChange((value) => {
+      const vecColor = new THREE.Color(
+        value.r / 255.0,
+        value.g / 255.0,
+        value.b / 255.0
+      );
+
+      material.uniforms.layer4Color.value = vecColor;
+    });
+
+  layersFolder
+    .addColor(planetConfig.layers, "layer5Color")
+    .name("Layer 5 Color")
+    .onChange((value) => {
+      const vecColor = new THREE.Color(
+        value.r / 255.0,
+        value.g / 255.0,
+        value.b / 255.0
+      );
+
+      material.uniforms.layer5Color.value = vecColor;
+    });
+
   waterFolder
     .add(waterConfig.water, "timeScale", 0, 0.1)
     .name("Time Scale")
     .onChange((value) => {
       waterMaterial.uniforms.timeScale.value = value;
       waterConfig.water.timeScale = value;
-    });
-
-  waterFolder
-    .add(waterConfig.water, "waveFrequency", 0, 10.0)
-    .name("Wave Frequency")
-    .onChange((value) => {
-      waterMaterial.uniforms.waveFrequency.value = value;
-      waterConfig.water.waveFrequency = value;
     });
 
   waterFolder
@@ -748,7 +794,6 @@ export function setupGUI(material, waterMaterial) {
 
       waterMaterial.uniforms.waterSpecular.value = vecColor;
     });
-
 
   phongFolder.open();
   terrainFolder.open();
