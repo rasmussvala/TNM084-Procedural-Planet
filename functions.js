@@ -867,9 +867,7 @@ export function createClouds() {
         map: cloudTexture,
         color: 0xffffff,
         transparent: true,
-        blending: THREE.AdditiveBlending,
-        side: THREE.DoubleSide,
-        opacity: Math.random(),
+        opacity: Math.random() * 0.7,
       });
 
       const cloud = new THREE.Sprite(cloudMaterial);
