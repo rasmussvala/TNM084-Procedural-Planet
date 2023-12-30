@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import {
   createSun,
-  createPlanet,
+  createPlanetMaterial as createPlanetMaterial,
   setupSceneAndControls,
   setupGUI,
   createStars,
@@ -34,7 +34,27 @@ const stars = createStars();
 scene.add(stars);
 
 // Create the planet (parameters will be changed in gui)
-let planet = createPlanet();
+let material = createPlanetMaterial();
+
+// Create different levels of detail
+const highDetail = new THREE.SphereGeometry(1, 512, 512); // byt till icosahedron
+const mediumDetail = new THREE.SphereGeometry(1, 256, 256);
+const lowDetail = new THREE.SphereGeometry(1, 16, 16);
+
+// Create mesh for each level of detail
+const highDetailMesh = new THREE.Mesh(highDetail, material);
+const mediumDetailMesh = new THREE.Mesh(mediumDetail, material);
+const lowDetailMesh = new THREE.Mesh(lowDetail, material);
+
+// Create LOD object
+const planet = new THREE.LOD();
+
+// Add LOD levels
+planet.addLevel(highDetailMesh, 1);
+planet.addLevel(mediumDetailMesh, 6);
+planet.addLevel(lowDetailMesh, 15);
+
+// Add LOD object to the scene
 scene.add(planet);
 
 // Creates clouds
@@ -55,6 +75,8 @@ function animate() {
 
   // Update 'time' uniform for the water material
   water.material.uniforms.time.value += deltaTime; // Use 'water.material' to access the water material
+
+  planet.update(camera);
 
   controls.update();
   renderer.render(scene, camera);

@@ -299,7 +299,7 @@ export function createWaterSphere(position, size) {
   return waterSphere;
 }
 
-export function createPlanet() {
+export function createPlanetMaterial() {
   // ********** VERTEX SHADER **********
   const vertexShader = /*glsl*/ `
     
@@ -502,10 +502,7 @@ export function createPlanet() {
     fragmentShader: fragmentShader,
   });
 
-  const geometry = new THREE.IcosahedronGeometry(1, 256);
-  const planet = new THREE.Mesh(geometry, material);
-
-  return planet;
+  return material;
 }
 
 export function setupGUI(material, waterMaterial) {
