@@ -2,7 +2,7 @@ import * as THREE from "three";
 import dat from "dat.gui";
 import { terrainConfig, waterConfig } from "./config";
 
-export function setupGUI(material, waterMaterial) {
+export function setupGUI(terrainMaterial, waterMaterial) {
   const gui = new dat.GUI();
   const phongFolder = gui.addFolder("Phong Illumination");
   const terrainFolder = gui.addFolder("Terrain Parameters");
@@ -13,7 +13,7 @@ export function setupGUI(material, waterMaterial) {
     .add(terrainConfig.phong, "Ka", 0, 1.0)
     .name("Ka")
     .onChange((value) => {
-      material.uniforms.Ka.value = value;
+      terrainMaterial.uniforms.Ka.value = value;
       waterMaterial.uniforms.waterKa.value = value;
       terrainConfig.phong.Ka = value; // Update config
     });
@@ -22,7 +22,7 @@ export function setupGUI(material, waterMaterial) {
     .add(terrainConfig.phong, "Kd", 0, 1.0)
     .name("Kd")
     .onChange((value) => {
-      material.uniforms.Kd.value = value;
+      terrainMaterial.uniforms.Kd.value = value;
       terrainConfig.phong.Kd = value; // Update config
     });
 
@@ -30,7 +30,7 @@ export function setupGUI(material, waterMaterial) {
     .add(terrainConfig.phong, "Ks", 0, 1.0)
     .name("Ks")
     .onChange((value) => {
-      material.uniforms.Ks.value = value;
+      terrainMaterial.uniforms.Ks.value = value;
       terrainConfig.phong.Ks = value; // Update config
     });
 
@@ -38,7 +38,7 @@ export function setupGUI(material, waterMaterial) {
     .add(terrainConfig.phong, "shininess", 0.1, 100.0)
     .name("Shininess")
     .onChange((value) => {
-      material.uniforms.shininess.value = value;
+      terrainMaterial.uniforms.shininess.value = value;
       terrainConfig.phong.shininess = value; // Update config
     });
 
@@ -52,7 +52,7 @@ export function setupGUI(material, waterMaterial) {
         value.b / 255.0
       );
 
-      material.uniforms.ambientColor.value = vecColor;
+      terrainMaterial.uniforms.ambientColor.value = vecColor;
     });
 
   phongFolder
@@ -65,7 +65,7 @@ export function setupGUI(material, waterMaterial) {
         value.b / 255.0
       );
 
-      material.uniforms.diffuseColor.value = vecColor;
+      terrainMaterial.uniforms.diffuseColor.value = vecColor;
     });
 
   phongFolder
@@ -78,14 +78,14 @@ export function setupGUI(material, waterMaterial) {
         value.b / 255.0
       );
 
-      material.uniforms.specularColor.value = vecColor;
+      terrainMaterial.uniforms.specularColor.value = vecColor;
     });
 
   terrainFolder
     .add(terrainConfig.fbm, "octaves", 0, 5.0)
     .name("Octaves")
     .onChange((value) => {
-      material.uniforms.octaves.value = value;
+      terrainMaterial.uniforms.octaves.value = value;
       terrainConfig.fbm.octaves = value; // Update config
     });
 
@@ -93,7 +93,7 @@ export function setupGUI(material, waterMaterial) {
     .add(terrainConfig.fbm, "lacunarity", 0, 5.0)
     .name("Lacunarity")
     .onChange((value) => {
-      material.uniforms.lacunarity.value = value;
+      terrainMaterial.uniforms.lacunarity.value = value;
       terrainConfig.fbm.lacunarity = value; // Update config
     });
 
@@ -101,7 +101,7 @@ export function setupGUI(material, waterMaterial) {
     .add(terrainConfig.fbm, "frequency", 0, 5.0)
     .name("Frequency")
     .onChange((value) => {
-      material.uniforms.frequency.value = value;
+      terrainMaterial.uniforms.frequency.value = value;
       terrainConfig.fbm.frequency = value; // Update config
     });
 
@@ -109,7 +109,7 @@ export function setupGUI(material, waterMaterial) {
     .add(terrainConfig.fbm, "amplitude", 0, 5.0)
     .name("Amplitude")
     .onChange((value) => {
-      material.uniforms.amplitude.value = value;
+      terrainMaterial.uniforms.amplitude.value = value;
       terrainConfig.fbm.amplitude = value; // Update config
     });
 
@@ -117,7 +117,7 @@ export function setupGUI(material, waterMaterial) {
     .add(terrainConfig.fbm, "depthGain", 0, 1.0)
     .name("Depth Gain")
     .onChange((value) => {
-      material.uniforms.depthGain.value = value;
+      terrainMaterial.uniforms.depthGain.value = value;
       terrainConfig.fbm.depthGain = value; // Update config
     });
 
@@ -125,7 +125,7 @@ export function setupGUI(material, waterMaterial) {
     .add(terrainConfig.layers, "layer1Threshold", 0.0, 1.0)
     .name("Threshold 1")
     .onChange((value) => {
-      material.uniforms.layer1Threshold.value = value;
+      terrainMaterial.uniforms.layer1Threshold.value = value;
       terrainConfig.layers.layer1Threshold = value; // Update config
     });
 
@@ -133,7 +133,7 @@ export function setupGUI(material, waterMaterial) {
     .add(terrainConfig.layers, "layer2Threshold", 0.0, 1.0)
     .name("Threshold 2")
     .onChange((value) => {
-      material.uniforms.layer2Threshold.value = value;
+      terrainMaterial.uniforms.layer2Threshold.value = value;
       terrainConfig.layers.layer2Threshold = value; // Update config
     });
 
@@ -141,7 +141,7 @@ export function setupGUI(material, waterMaterial) {
     .add(terrainConfig.layers, "layer3Threshold", 0.0, 1.0)
     .name("Threshold 3")
     .onChange((value) => {
-      material.uniforms.layer3Threshold.value = value;
+      terrainMaterial.uniforms.layer3Threshold.value = value;
       terrainConfig.layers.layer3Threshold = value; // Update config
     });
 
@@ -149,7 +149,7 @@ export function setupGUI(material, waterMaterial) {
     .add(terrainConfig.layers, "layer4Threshold", 0.0, 1.0)
     .name("Threshold 4")
     .onChange((value) => {
-      material.uniforms.layer4Threshold.value = value;
+      terrainMaterial.uniforms.layer4Threshold.value = value;
       terrainConfig.layers.layer4Threshold = value; // Update config
     });
 
@@ -157,7 +157,7 @@ export function setupGUI(material, waterMaterial) {
     .add(terrainConfig.layers, "layer5Threshold", 0.0, 1.0)
     .name("Threshold 5")
     .onChange((value) => {
-      material.uniforms.layer5Threshold.value = value;
+      terrainMaterial.uniforms.layer5Threshold.value = value;
       terrainConfig.layers.layer5Threshold = value; // Update config
     });
 
@@ -165,7 +165,7 @@ export function setupGUI(material, waterMaterial) {
     .add(terrainConfig.layers, "maxTerrainRadius", 0, 5.0)
     .name("Max Terrain Radius")
     .onChange((value) => {
-      material.uniforms.maxTerrainRadius.value = value;
+      terrainMaterial.uniforms.maxTerrainRadius.value = value;
       terrainConfig.layers.maxTerrainRadius = value; // Update config
     });
 
@@ -179,7 +179,7 @@ export function setupGUI(material, waterMaterial) {
         value.b / 255.0
       );
 
-      material.uniforms.layer1Color.value = vecColor;
+      terrainMaterial.uniforms.layer1Color.value = vecColor;
     });
 
   layersFolder
@@ -192,7 +192,7 @@ export function setupGUI(material, waterMaterial) {
         value.b / 255.0
       );
 
-      material.uniforms.layer2Color.value = vecColor;
+      terrainMaterial.uniforms.layer2Color.value = vecColor;
     });
 
   layersFolder
@@ -205,7 +205,7 @@ export function setupGUI(material, waterMaterial) {
         value.b / 255.0
       );
 
-      material.uniforms.layer3Color.value = vecColor;
+      terrainMaterial.uniforms.layer3Color.value = vecColor;
     });
 
   layersFolder
@@ -218,7 +218,7 @@ export function setupGUI(material, waterMaterial) {
         value.b / 255.0
       );
 
-      material.uniforms.layer4Color.value = vecColor;
+      terrainMaterial.uniforms.layer4Color.value = vecColor;
     });
 
   layersFolder
@@ -231,7 +231,7 @@ export function setupGUI(material, waterMaterial) {
         value.b / 255.0
       );
 
-      material.uniforms.layer5Color.value = vecColor;
+      terrainMaterial.uniforms.layer5Color.value = vecColor;
     });
 
   waterFolder
