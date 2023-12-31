@@ -1,13 +1,10 @@
 import * as THREE from "three";
-import {
-  createSun,
-  createPlanetMaterial,
-  setupSceneAndControls,
-  setupGUI,
-  createStars,
-  createClouds,
-  createWaterMaterial,
-} from "./functions.js";
+import { createPlanetMaterial, createWaterMaterial } from "./functions.js";
+import { setupGUI } from "./functions/gui.js";
+import { setupSceneAndControls } from "./functions/setupSceneAndControls.js";
+import { createSun } from "./functions/createSun.js";
+import { createClouds } from "./functions/createClouds.js";
+import { createStars } from "./functions/createStars.js";
 
 // Boilerplate code - made into a function
 const { scene, camera, renderer, controls } = setupSceneAndControls();
