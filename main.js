@@ -1,12 +1,12 @@
 import * as THREE from "three";
 import {
   createSun,
-  createPlanetMaterial as createPlanetMaterial,
+  createPlanetMaterial,
   setupSceneAndControls,
   setupGUI,
   createStars,
   createClouds,
-  createWaterSphere,
+  createWaterMaterial,
 } from "./functions.js";
 
 // Boilerplate code - made into a function
@@ -24,45 +24,51 @@ const sunSize = 0.8;
 const sun = createSun(sunPosition, sunSize);
 scene.add(sun);
 
-// Create water
-const waterSize = 1.0;
-const water = createWaterSphere(new THREE.Vector3(0.0, 0.0, 0.0), waterSize);
-scene.add(water);
-
 // Creates stars
 const stars = createStars();
 scene.add(stars);
 
-// Create the planet (parameters will be changed in gui)
-let material = createPlanetMaterial();
-
 // Create different levels of detail
-const highDetail = new THREE.SphereGeometry(1, 512, 512); // byt till icosahedron
-const mediumDetail = new THREE.SphereGeometry(1, 256, 256);
-const lowDetail = new THREE.SphereGeometry(1, 16, 16);
+const highDetail = new THREE.IcosahedronGeometry(1, 128); // byt till icosahedron
+const mediumDetail = new THREE.IcosahedronGeometry(1, 32);
+const lowDetail = new THREE.IcosahedronGeometry(1, 16);
+
+// Create materials in shader
+let waterMaterial = createWaterMaterial();
+let planetMaterial = createPlanetMaterial();
 
 // Create mesh for each level of detail
-const highDetailMesh = new THREE.Mesh(highDetail, material);
-const mediumDetailMesh = new THREE.Mesh(mediumDetail, material);
-const lowDetailMesh = new THREE.Mesh(lowDetail, material);
+const highDetailMeshPlanet = new THREE.Mesh(highDetail, planetMaterial);
+const mediumDetailMeshPlanet = new THREE.Mesh(mediumDetail, planetMaterial);
+const lowDetailMeshPlanet = new THREE.Mesh(lowDetail, planetMaterial);
 
-// Create LOD object
+const highDetailMeshWater = new THREE.Mesh(highDetail, waterMaterial);
+const mediumDetailMeshWater = new THREE.Mesh(mediumDetail, waterMaterial);
+const lowDetailMeshWater = new THREE.Mesh(lowDetail, waterMaterial);
+
+// Create LOD objects
 const planet = new THREE.LOD();
+const water = new THREE.LOD();
 
 // Add LOD levels
-planet.addLevel(highDetailMesh, 1);
-planet.addLevel(mediumDetailMesh, 6);
-planet.addLevel(lowDetailMesh, 15);
+planet.addLevel(highDetailMeshPlanet, 1);
+planet.addLevel(mediumDetailMeshPlanet, 6);
+planet.addLevel(lowDetailMeshPlanet, 15);
+
+water.addLevel(highDetailMeshWater, 1);
+water.addLevel(mediumDetailMeshWater, 6);
+water.addLevel(lowDetailMeshWater, 15);
 
 // Add LOD object to the scene
 scene.add(planet);
+scene.add(water);
 
 // Creates clouds
 const clouds = createClouds();
 scene.add(clouds);
 
 // Creates the UI for interaction
-setupGUI(planet.material, water.material);
+setupGUI(planetMaterial, waterMaterial);
 
 // Animation function
 function animate() {
@@ -74,9 +80,10 @@ function animate() {
   clouds.rotation.y += 0.04 * deltaTime;
 
   // Update 'time' uniform for the water material
-  water.material.uniforms.time.value += deltaTime; // Use 'water.material' to access the water material
+  waterMaterial.uniforms.time.value += deltaTime; // Use 'water.material' to access the water material
 
   planet.update(camera);
+  water.update(camera);
 
   controls.update();
   renderer.render(scene, camera);

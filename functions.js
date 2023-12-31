@@ -9,11 +9,11 @@ const noise = new Noise(Math.random());
 // Central Configuration Object
 const planetConfig = {
   phong: {
-    Ka: 0.05,
+    Ka: 0.25,
     Kd: 0.8,
     Ks: 0.01,
     shininess: 30.0,
-    ambientColor: new THREE.Color(0.7, 0.3, 0.0),
+    ambientColor: new THREE.Color(0.1, 0.2, 0.0),
     diffuseColor: new THREE.Color(0.7, 0.3, 0.0),
     specularColor: new THREE.Color(1.0, 1.0, 1.0),
   },
@@ -89,7 +89,7 @@ export function createSun(position, size) {
   return sun;
 }
 
-export function createWaterSphere(position, size) {
+export function createWaterMaterial() {
   // Custom shader for water effect
   const waterShader = {
     uniforms: {
@@ -276,8 +276,6 @@ export function createWaterSphere(position, size) {
     `,
   };
 
-  const waterGeometry = new THREE.IcosahedronGeometry(size, 128);
-
   const waterMaterial = new THREE.ShaderMaterial({
     uniforms: waterShader.uniforms,
     vertexShader: waterShader.vertexShader,
@@ -288,15 +286,7 @@ export function createWaterSphere(position, size) {
     depthWrite: true,
   });
 
-  const waterSphere = new THREE.Mesh(waterGeometry, waterMaterial);
-  waterSphere.renderOrder = 0; // Set render order
-
-  // Place at provided position or (0, 0, 0) if not specified
-  if (position) {
-    waterSphere.position.set(position.x, position.y, position.z);
-  }
-
-  return waterSphere;
+  return waterMaterial;
 }
 
 export function createPlanetMaterial() {
