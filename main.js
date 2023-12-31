@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import {
-  createPlanetMaterial,
+  createTerrainMaterial,
   createWaterMaterial,
 } from "./functions/materials.js";
 import { setupSceneAndControls } from "./functions/setupSceneAndControls.js";
@@ -20,15 +20,15 @@ scene.add(clouds);
 
 // Create materials
 let waterMaterial = createWaterMaterial();
-let planetMaterial = createPlanetMaterial();
+let terrainMaterial = createTerrainMaterial();
 
 // Create LOD objects
-const { planet, water } = createLODObjects(planetMaterial, waterMaterial);
-scene.add(planet);
+const { terrain, water } = createLODObjects(terrainMaterial, waterMaterial);
+scene.add(terrain);
 scene.add(water);
 
 // Setup GUI
-setupGUI(planetMaterial, waterMaterial);
+setupGUI(terrainMaterial, waterMaterial);
 
 function updateScene(deltaTime) {
   clouds.rotation.x += 0.02 * deltaTime;
@@ -36,7 +36,7 @@ function updateScene(deltaTime) {
 
   waterMaterial.uniforms.time.value += deltaTime;
 
-  planet.update(camera);
+  terrain.update(camera);
   water.update(camera);
 }
 

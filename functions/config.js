@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 // Central Configuration Object
-export const planetConfig = {
+export const terrainConfig = {
   phong: {
     Ka: 0.25,
     Kd: 0.8,
@@ -24,7 +24,7 @@ export const planetConfig = {
     layer3Threshold: 0.3,
     layer4Threshold: 0.2,
     layer5Threshold: 0.1,
-    maxPlanetRadius: 3.0,
+    maxTerrainRadius: 3.0,
     layer1Color: new THREE.Color(1.0, 1.0, 1.0),
     layer2Color: new THREE.Color(0.02, 0.4, 0.02),
     layer3Color: new THREE.Color(1.0, 1.0, 1.0),

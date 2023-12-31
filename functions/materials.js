@@ -2,10 +2,10 @@ import * as THREE from "three";
 import {
   waterVertexShader,
   waterFragmentShader,
-  planetVertexShader,
-  planetFragmentShader,
+  terrainVertexShader,
+  terrainFragmentShader,
 } from "./shaders";
-import { planetConfig, waterConfig } from "./config";
+import { terrainConfig, waterConfig } from "./config";
 
 export function createWaterMaterial() {
   // Custom shader for water effect
@@ -17,7 +17,7 @@ export function createWaterMaterial() {
       waterAmbient: { value: waterConfig.water.waterAmbient },
       waterDiffuse: { value: waterConfig.water.waterDiffuse },
       waterSpecular: { value: waterConfig.water.waterSpecular },
-      waterKa: { value: planetConfig.phong.Ka },
+      waterKa: { value: terrainConfig.phong.Ka },
     },
     vertexShader: waterVertexShader,
     fragmentShader: waterFragmentShader,
@@ -36,37 +36,37 @@ export function createWaterMaterial() {
   return waterMaterial;
 }
 
-export function createPlanetMaterial() {
-  const vertexShader = planetVertexShader;
-  const fragmentShader = planetFragmentShader;
+export function createTerrainMaterial() {
+  const vertexShader = terrainVertexShader;
+  const fragmentShader = terrainFragmentShader;
 
   const material = new THREE.ShaderMaterial({
     uniforms: {
-      Ka: { value: planetConfig.phong.Ka },
-      Kd: { value: planetConfig.phong.Kd },
-      Ks: { value: planetConfig.phong.Ks },
-      shininess: { value: planetConfig.phong.shininess },
-      ambientColor: { value: planetConfig.phong.ambientColor },
-      diffuseColor: { value: planetConfig.phong.diffuseColor },
-      specularColor: { value: planetConfig.phong.specularColor },
+      Ka: { value: terrainConfig.phong.Ka },
+      Kd: { value: terrainConfig.phong.Kd },
+      Ks: { value: terrainConfig.phong.Ks },
+      shininess: { value: terrainConfig.phong.shininess },
+      ambientColor: { value: terrainConfig.phong.ambientColor },
+      diffuseColor: { value: terrainConfig.phong.diffuseColor },
+      specularColor: { value: terrainConfig.phong.specularColor },
 
-      octaves: { value: planetConfig.fbm.octaves },
-      lacunarity: { value: planetConfig.fbm.lacunarity },
-      frequency: { value: planetConfig.fbm.frequency },
-      amplitude: { value: planetConfig.fbm.amplitude },
-      depthGain: { value: planetConfig.fbm.depthGain },
+      octaves: { value: terrainConfig.fbm.octaves },
+      lacunarity: { value: terrainConfig.fbm.lacunarity },
+      frequency: { value: terrainConfig.fbm.frequency },
+      amplitude: { value: terrainConfig.fbm.amplitude },
+      depthGain: { value: terrainConfig.fbm.depthGain },
 
-      layer1Threshold: { value: planetConfig.layers.layer1Threshold },
-      layer2Threshold: { value: planetConfig.layers.layer2Threshold },
-      layer3Threshold: { value: planetConfig.layers.layer3Threshold },
-      layer4Threshold: { value: planetConfig.layers.layer4Threshold },
-      layer5Threshold: { value: planetConfig.layers.layer5Threshold },
-      maxPlanetRadius: { value: planetConfig.layers.maxPlanetRadius },
-      layer1Color: { value: planetConfig.layers.layer1Color },
-      layer2Color: { value: planetConfig.layers.layer2Color },
-      layer3Color: { value: planetConfig.layers.layer3Color },
-      layer4Color: { value: planetConfig.layers.layer4Color },
-      layer5Color: { value: planetConfig.layers.layer5Color },
+      layer1Threshold: { value: terrainConfig.layers.layer1Threshold },
+      layer2Threshold: { value: terrainConfig.layers.layer2Threshold },
+      layer3Threshold: { value: terrainConfig.layers.layer3Threshold },
+      layer4Threshold: { value: terrainConfig.layers.layer4Threshold },
+      layer5Threshold: { value: terrainConfig.layers.layer5Threshold },
+      maxTerrainRadius: { value: terrainConfig.layers.maxTerrainRadius },
+      layer1Color: { value: terrainConfig.layers.layer1Color },
+      layer2Color: { value: terrainConfig.layers.layer2Color },
+      layer3Color: { value: terrainConfig.layers.layer3Color },
+      layer4Color: { value: terrainConfig.layers.layer4Color },
+      layer5Color: { value: terrainConfig.layers.layer5Color },
     },
     vertexShader: vertexShader,
     fragmentShader: fragmentShader,

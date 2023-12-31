@@ -173,7 +173,7 @@ void main() {
 }
 `;
 
-export const planetVertexShader = /*glsl*/ `
+export const terrainVertexShader = /*glsl*/ `
     
 // Variables
 varying vec3 vNormal;
@@ -261,7 +261,7 @@ void main() {
   gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
 }`;
 
-export const planetFragmentShader = /*glsl*/ `
+export const terrainFragmentShader = /*glsl*/ `
 
 varying vec3 vNormal;  // Surface normal
 varying vec3 vPosition;  // Vertex position
@@ -282,7 +282,7 @@ uniform float layer2Threshold;
 uniform float layer3Threshold; 
 uniform float layer4Threshold;
 uniform float layer5Threshold;
-uniform float maxPlanetRadius;
+uniform float maxTerrainRadius;
 
 // Define colors for different layers
 uniform vec3 layer1Color; 
@@ -296,7 +296,7 @@ vec3 layerColor() {
   float distanceToCore = length(vec3(0.0, 0.0, 0.0) - vPosition);
 
   // Normalize the distance to be between 0 and 1
-  float normalizedDistance = distanceToCore / maxPlanetRadius;
+  float normalizedDistance = distanceToCore / maxTerrainRadius;
 
   // Determine the blend factors based on distance for each layer
   float layer1Factor = smoothstep(layer2Threshold, layer1Threshold, normalizedDistance);
