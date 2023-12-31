@@ -1,5 +1,8 @@
 import * as THREE from "three";
-import { createPlanetMaterial, createWaterMaterial } from "./functions.js";
+import {
+  createPlanetMaterial,
+  createWaterMaterial,
+} from "./functions/materials.js";
 import { setupGUI } from "./functions/gui.js";
 import { setupSceneAndControls } from "./functions/setupSceneAndControls.js";
 import { createSun } from "./functions/createSun.js";
