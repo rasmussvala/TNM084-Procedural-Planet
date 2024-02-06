@@ -24,5 +24,15 @@ export function setupSceneAndControls() {
   camera.position.z = 5;
   controls.update();
 
+  // Function to handle window resize
+  function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  // Listen for window resize event
+  window.addEventListener("resize", onWindowResize);
+
   return { scene, camera, renderer, controls };
 }
