@@ -1,4 +1,4 @@
-import { random3, noise } from "./shaderUtils";
+import { random3, noise, fbm } from "./shaderUtils";
 
 export const terrainVertexShader =
   /*glsl*/ `
@@ -14,23 +14,8 @@ uniform float amplitude;
 uniform float depthGain; ` +
   random3 +
   noise +
+  fbm +
   /*glsl*/ `
-
-// Fractal Brownian Noise for surface texture
-float fbm(vec3 st) {
-
-  float height = 1.0;
-  float localAmplitude = amplitude;
-  float localFrequency = frequency;
-  
-  for (int i = 0; i < octaves; i++) {
-      height += noise(st * localFrequency) * localAmplitude;
-      localAmplitude *= depthGain;
-      localFrequency *= lacunarity;
-  }
-
-  return height;
-}
 
 void main() {
   // Shader uses Triangle method to calculate normals
