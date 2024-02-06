@@ -1,10 +1,6 @@
 import * as THREE from "three";
-import {
-  waterVertexShader,
-  waterFragmentShader,
-  terrainVertexShader,
-  terrainFragmentShader,
-} from "./shaders";
+import { terrainVertexShader, terrainFragmentShader } from "./terrainShaders";
+import { waterVertexShader, waterFragmentShader } from "./waterShader";
 import { terrainConfig, waterConfig } from "./config";
 
 export function createWaterMaterial() {
