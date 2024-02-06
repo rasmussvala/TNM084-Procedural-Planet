@@ -1,4 +1,4 @@
-import { random3, noise, fbm } from "./shaderUtils";
+import { random3, noise, fbm, calcNormal } from "./shaderUtils";
 
 export const terrainVertexShader =
   /*glsl*/ `
@@ -15,33 +15,15 @@ uniform float depthGain; ` +
   random3 +
   noise +
   fbm +
+  calcNormal +
   /*glsl*/ `
 
 void main() {
-  // Shader uses Triangle method to calculate normals
   vec3 p = position;
-
-  // Calculate nearby points for the normal
-  vec3 pN = normalize(p); // normalize(p);
+  vec3 pN = normalize(p);
 
   p = pN * fbm(pN);
-  
-  vec3 v1 = mix(vec3(0.0, 1.0, 0.0), vec3(1.0, 0.0, 0.0), step(0.9, abs(dot(pN, vec3(1.0, 0.0, 0.0)))));
-  
-  float deltaStep = 0.00001;
-  
-  v1 = cross(pN, v1);
-  vec3 p1 = pN + v1 * deltaStep;
-  p1 *= fbm(p1);
-
-  vec3 v2 = cross(pN, v1);
-  vec3 p2 = pN + v2 * deltaStep;
-  p2 *= fbm(p2);
-
-  // Compute new normal and pass to fragment shader
-  vNormal = normalize(cross((p1 - p), (p2 - p)));
-
-  // Pass the new position to the fragment shader
+  vNormal = calcNormal(p, pN);
   vPosition = p;
 
   gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);

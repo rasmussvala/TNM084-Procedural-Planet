@@ -75,21 +75,21 @@ float fbm(vec3 st) {
   return height;
 }`;
 
-// export const calcNormal = `
-// vec3 calcNormal(vec3 p, vec3 pN) {
-
-//     vec3 v1 = mix(vec3(0.0, 1.0, 0.0), vec3(1.0, 0.0, 0.0), step(0.9, abs(dot(pN, vec3(1.0, 0.0, 0.0)))));
-
-//     float deltaStep = 0.00001;
-
-//     v1 = cross(pN, v1);
-//     vec3 p1 = pN + v1 * deltaStep;
-//     p1 *= fbm(p1);
-
-//     vec3 v2 = cross(pN, v1);
-//     vec3 p2 = pN + v2 * deltaStep;
-//     p2 *= fbm(p2);
-
-//     // Compute new normal
-//     return normalize(cross((p1 - p), (p2 - p)));
-// }`;
+export const calcNormal = `
+vec3 calcNormal(vec3 p, vec3 pN) {
+    
+    vec3 v1 = mix(vec3(0.0, 1.0, 0.0), vec3(1.0, 0.0, 0.0), step(0.9, abs(dot(pN, vec3(1.0, 0.0, 0.0)))));
+    
+    float deltaStep = 0.00001;
+    
+    v1 = cross(pN, v1);
+    vec3 p1 = pN + v1 * deltaStep;
+    p1 *= fbm(p1);
+    
+    vec3 v2 = cross(pN, v1);
+    vec3 p2 = pN + v2 * deltaStep;
+    p2 *= fbm(p2);
+    
+    // Compute new normal
+    return normalize(cross((p1 - p), (p2 - p)));
+}`;
