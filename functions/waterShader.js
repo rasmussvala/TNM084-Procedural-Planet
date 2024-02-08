@@ -15,9 +15,9 @@ uniform float timeScale; ` +
 float fbm(vec3 st) {
 
   float height = 1.0;
-  float amplitude = 0.2;
+  float amplitude = 0.1;
   float frequency = 0.4;
-  float octaves = 6.0;
+  float octaves = 4.0;
   float depthGain = 0.12;
   float lacunarity = 8.0;
   

@@ -5,7 +5,7 @@ import { Noise } from "noisejs"; // https://github.com/josephg/noisejs - stegu n
 const noise = new Noise(Math.random());
 
 export function createClouds() {
-  noise.seed(1);
+  noise.seed(Math.floor(Math.random() * 1000));
 
   // Loads a texture for the clouds
   const textureLoader = new THREE.TextureLoader();
