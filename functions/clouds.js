@@ -1,11 +1,11 @@
 import * as THREE from "three";
 import { Noise } from "noisejs"; // https://github.com/josephg/noisejs - stegu noise
-
+import { colorPalette } from "./config";
 // Initialize a random seed for the noise
 const noise = new Noise(Math.random());
 
 export function createClouds() {
-  noise.seed(1);
+  noise.seed(Math.random() * 100);
 
   // Loads a texture for the clouds
   const textureLoader = new THREE.TextureLoader();
@@ -19,7 +19,7 @@ export function createClouds() {
   let scale = 1.0; // init
 
   // Threshold for cloud spawning based on noise
-  const cloudSpawnThreshold = 0.05; // Adjust this as needed
+  const cloudSpawnThreshold = 0.25; // Adjust this as needed
 
   // Add clouds based on noise threshold
   for (let i = 0; i < numberOfCloudPositions; i++) {
@@ -33,7 +33,7 @@ export function createClouds() {
     if (noiseValue > cloudSpawnThreshold) {
       const cloudMaterial = new THREE.SpriteMaterial({
         map: cloudTexture,
-        color: 0xffffff,
+        color: colorPalette[0],
         transparent: true,
         opacity: Math.random() * 0.7,
       });

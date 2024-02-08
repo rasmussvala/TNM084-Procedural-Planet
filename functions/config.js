@@ -23,7 +23,7 @@ function generateHSLPalette(
 const colorRange = 360;
 const baseHue = Math.random() * colorRange;
 const numLayerColors = 4;
-const layerPalette = generateHSLPalette(baseHue, numLayerColors);
+export const colorPalette = generateHSLPalette(baseHue, numLayerColors);
 
 // Generate terrain parameters
 function generateTerrainValue() {
@@ -41,10 +41,10 @@ function generateAmpValue() {
 export const terrainConfig = {
   phong: {
     Ka: 0.05,
-    Kd: 0.8,
+    Kd: 0.7,
     Ks: 0.01,
     shininess: 100.0,
-    ambientColor: layerPalette[2],
+    ambientColor: colorPalette[2],
     diffuseColor: new THREE.Color(1.0, 1.0, 1.0),
     specularColor: new THREE.Color(1.0, 1.0, 1.0),
   },
@@ -62,10 +62,10 @@ export const terrainConfig = {
     layer4Threshold: 0.52,
     layer5Threshold: 0.47,
     maxTerrainRadius: 2.0,
-    layer1Color: layerPalette[0],
-    layer2Color: layerPalette[1],
-    layer3Color: layerPalette[2],
-    layer4Color: layerPalette[3],
+    layer1Color: colorPalette[0],
+    layer2Color: colorPalette[1],
+    layer3Color: colorPalette[2],
+    layer4Color: colorPalette[3],
     layer5Color: new THREE.Color(0.0, 0.0, 0.0), // in the core of the planet, not visable
   },
 };
@@ -73,9 +73,9 @@ export const terrainConfig = {
 export const waterConfig = {
   water: {
     timeScale: 0.0001,
-    waveAmplitude: 1.0,
-    waterAmbient: layerPalette[2],
-    waterDiffuse: layerPalette[3],
+    waveAmplitude: 5.0,
+    waterAmbient: colorPalette[2],
+    waterDiffuse: colorPalette[3],
     waterSpecular: new THREE.Color(1.0, 1.0, 1.0),
   },
 };

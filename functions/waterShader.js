@@ -83,7 +83,7 @@ uniform float waterKa; ` +
 
 void main() { 
 
-  float waterKd = 1.0;
+  float waterKd = 0.7;
   float waterKs = 1.0;
   float waterShininess = 100.0;
 
@@ -103,12 +103,12 @@ void main() {
   specular = pow(specularAngle, waterShininess);
   }
   // Calculate wave pattern using the time and position, adjusting by amplitude
-  float waveDisplacement = perlin3DNoise(vPosition, time) * waveAmplitude;
+  float waveDisplacement = perlin3DNoise(vPosition, time * 0.02) * waveAmplitude;
 
-  float waterAlpha = 0.99 + 0.01 * sin(waveDisplacement * 10.0 + time);
+  float waterAlpha = 0.95 + 0.01 * sin(waveDisplacement * 10.0 + time);
 
   // Example: Apply wave pattern to color
-  vec3 waveColor = waterDiffuse + waterDiffuse * abs(sin(waveDisplacement * 0.5 + time * timeScale));
+  vec3 waveColor = waterDiffuse + waterDiffuse * (abs(sin(waveDisplacement + time * timeScale)) * 0.8 + 0.2);
 
   gl_FragColor = vec4(waterKa * waterAmbient +
                       waterKd * lambertian * waveColor +
