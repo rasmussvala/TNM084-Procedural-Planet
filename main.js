@@ -33,21 +33,21 @@ scene.add(water);
 // Setup GUI
 setupGUI(terrainMaterial, waterMaterial);
 
-function updateScene(deltaTime) {
-  clouds.rotation.x += 0.02 * deltaTime;
-  clouds.rotation.y += 0.04 * deltaTime;
-
-  waterMaterial.uniforms.time.value += deltaTime;
-}
+let deltaTime = clock.getDelta();
 
 function animate() {
   requestAnimationFrame(animate);
 
-  const deltaTime = clock.getDelta();
-  updateScene(deltaTime);
+  clouds.rotation.x += 0.02 * deltaTime;
+  clouds.rotation.y += 0.04 * deltaTime;
+
+  waterMaterial.uniforms.time.value += deltaTime;
+
   controls.update();
 
   renderer.render(scene, camera);
+
+  deltaTime = clock.getDelta();
 }
 
 animate();
