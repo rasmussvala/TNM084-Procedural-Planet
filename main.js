@@ -16,7 +16,7 @@ const clock = new THREE.Clock();
 const { sun, stars, clouds } = createSceneObjects();
 scene.add(sun);
 scene.add(stars);
-scene.add(clouds);
+// scene.add(clouds);
 
 // Create materials
 let waterMaterial = createWaterMaterial();

@@ -15,16 +15,16 @@ uniform float timeScale; ` +
 float fbm(vec3 st) {
 
   float height = 1.0;
-  float amplitude = 0.2;
+  float amplitude = 0.005;
   float frequency = 0.4;
-  float octaves = 6.0;
+  float octaves = 4.0;
   float depthGain = 0.12;
   float lacunarity = 8.0;
   
   for (float i = 0.0; i < octaves; i++) {
       height += perlin3DNoise(st * frequency, time * timeScale) * amplitude;
       amplitude *= depthGain;
-      frequency *= lacunarity + (time * 0.0001);
+      frequency *= lacunarity + (time * 0.0000000001);
   }
 
   return height;
@@ -85,7 +85,7 @@ void main() {
 
   float waterKd = 1.0;
   float waterKs = 1.0;
-  float waterShininess = 60.0;
+  float waterShininess = 100.0;
 
   vec3 lightPosition = vec3(10.0, 10.0, 10.0); // Light position
 
