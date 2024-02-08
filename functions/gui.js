@@ -39,13 +39,13 @@ export function setupGUI(terrainMaterial, waterMaterial) {
       terrainConfig.fbm.amplitude = value; // Update config
     });
 
-  terrainFolder
-    .add(terrainConfig.fbm, "depthGain", 0, 1.0)
-    .name("Depth Gain")
-    .onChange((value) => {
-      terrainMaterial.uniforms.depthGain.value = value;
-      terrainConfig.fbm.depthGain = value; // Update config
-    });
+  // terrainFolder
+  //   .add(terrainConfig.fbm, "depthGain", 0, 1.0)
+  //   .name("Depth Gain")
+  //   .onChange((value) => {
+  //     terrainMaterial.uniforms.depthGain.value = value;
+  //     terrainConfig.fbm.depthGain = value; // Update config
+  //   });
 
   terrainFolder
     .addColor(terrainConfig.layers, "layer1Color")
@@ -112,18 +112,18 @@ export function setupGUI(terrainMaterial, waterMaterial) {
       waterMaterial.uniforms.waterDiffuse.value = vecColor;
     });
 
-  waterFolder
-    .addColor(waterConfig.water, "waterSpecular")
-    .name("Water Specular")
-    .onChange((value) => {
-      const vecColor = new THREE.Color(
-        value.r / 255.0,
-        value.g / 255.0,
-        value.b / 255.0
-      );
+  // waterFolder
+  //   .addColor(waterConfig.water, "waterSpecular")
+  //   .name("Water Specular")
+  //   .onChange((value) => {
+  //     const vecColor = new THREE.Color(
+  //       value.r / 255.0,
+  //       value.g / 255.0,
+  //       value.b / 255.0
+  //     );
 
-      waterMaterial.uniforms.waterSpecular.value = vecColor;
-    });
+  //     waterMaterial.uniforms.waterSpecular.value = vecColor;
+  //   });
 
   terrainFolder.open();
   waterFolder.open();
