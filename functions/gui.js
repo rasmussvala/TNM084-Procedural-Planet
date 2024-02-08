@@ -82,7 +82,7 @@ export function setupGUI(terrainMaterial, waterMaterial) {
     });
 
   terrainFolder
-    .add(terrainConfig.fbm, "octaves", 0, 5.0)
+    .add(terrainConfig.fbm, "octaves", 1, 4.0)
     .name("Octaves")
     .onChange((value) => {
       terrainMaterial.uniforms.octaves.value = value;
@@ -90,7 +90,7 @@ export function setupGUI(terrainMaterial, waterMaterial) {
     });
 
   terrainFolder
-    .add(terrainConfig.fbm, "lacunarity", 0, 5.0)
+    .add(terrainConfig.fbm, "lacunarity", 0.2, 3.0)
     .name("Lacunarity")
     .onChange((value) => {
       terrainMaterial.uniforms.lacunarity.value = value;
@@ -98,7 +98,7 @@ export function setupGUI(terrainMaterial, waterMaterial) {
     });
 
   terrainFolder
-    .add(terrainConfig.fbm, "frequency", 0, 5.0)
+    .add(terrainConfig.fbm, "frequency", 1.0, 3.0)
     .name("Frequency")
     .onChange((value) => {
       terrainMaterial.uniforms.frequency.value = value;
@@ -106,7 +106,7 @@ export function setupGUI(terrainMaterial, waterMaterial) {
     });
 
   terrainFolder
-    .add(terrainConfig.fbm, "amplitude", 0, 5.0)
+    .add(terrainConfig.fbm, "amplitude", 0.2, 0.6)
     .name("Amplitude")
     .onChange((value) => {
       terrainMaterial.uniforms.amplitude.value = value;
@@ -114,7 +114,7 @@ export function setupGUI(terrainMaterial, waterMaterial) {
     });
 
   terrainFolder
-    .add(terrainConfig.fbm, "depthGain", 0, 1.0)
+    .add(terrainConfig.fbm, "depthGain", 0, 0.4)
     .name("Depth Gain")
     .onChange((value) => {
       terrainMaterial.uniforms.depthGain.value = value;
