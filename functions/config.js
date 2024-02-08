@@ -3,12 +3,12 @@ import * as THREE from "three";
 // Central Configuration Object
 export const terrainConfig = {
   phong: {
-    Ka: 0.25,
+    Ka: 0.03,
     Kd: 0.8,
     Ks: 0.01,
     shininess: 30.0,
-    ambientColor: new THREE.Color(0.1, 0.2, 0.0),
-    diffuseColor: new THREE.Color(0.7, 0.3, 0.0),
+    ambientColor: new THREE.Color(1.0, 1.0, 1.0),
+    diffuseColor: new THREE.Color(1.0, 1.0, 1.0),
     specularColor: new THREE.Color(1.0, 1.0, 1.0),
   },
   fbm: {
@@ -37,7 +37,7 @@ export const waterConfig = {
   water: {
     timeScale: 0.0001,
     waveAmplitude: 1.0,
-    waterAmbient: new THREE.Color(0.1, 0.3, 0.8),
+    waterAmbient: new THREE.Color(1.0, 1.0, 1.0),
     waterDiffuse: new THREE.Color(0.1, 0.3, 0.8),
     waterSpecular: new THREE.Color(1.0, 1.0, 1.0),
   },
