@@ -5,7 +5,6 @@ import {
 } from "./functions/materials.js";
 import { setupSceneAndControls } from "./functions/setupSceneAndControls.js";
 import { createSceneObjects } from "./functions/sceneObjects.js";
-import { createObjects } from "./functions/lodObjects.js";
 import { setupGUI } from "./functions/gui.js";
 
 // Boilerplate code - made into a function
@@ -23,7 +22,11 @@ let waterMaterial = createWaterMaterial();
 let terrainMaterial = createTerrainMaterial();
 
 // Create Objects
-const { terrain, water } = createObjects(terrainMaterial, waterMaterial);
+const geometry = new THREE.IcosahedronGeometry(1, 128);
+
+const terrain = new THREE.Mesh(geometry, terrainMaterial);
+const water = new THREE.Mesh(geometry, waterMaterial);
+
 scene.add(terrain);
 scene.add(water);
 
