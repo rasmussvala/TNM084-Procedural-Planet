@@ -2,6 +2,21 @@ import * as THREE from "three";
 import dat from "dat.gui";
 import { terrainConfig, waterConfig } from "./config";
 
+function convertColorToArray(color) {
+  const r = Math.round(color.r * 255);
+  const g = Math.round(color.g * 255);
+  const b = Math.round(color.b * 255);
+
+  return [r, g, b];
+}
+
+var palette = {
+  color1: convertColorToArray(terrainConfig.layers.layer1Color),
+  color2: convertColorToArray(terrainConfig.layers.layer2Color),
+  color3: convertColorToArray(terrainConfig.layers.layer3Color),
+  color4: convertColorToArray(terrainConfig.layers.layer4Color),
+};
+
 export function setupGUI(terrainMaterial, waterMaterial) {
   const gui = new dat.GUI();
   const terrainFolder = gui.addFolder("Terrain Parameters");
@@ -39,64 +54,56 @@ export function setupGUI(terrainMaterial, waterMaterial) {
       terrainConfig.fbm.amplitude = value; // Update config
     });
 
-  // terrainFolder
-  //   .add(terrainConfig.fbm, "depthGain", 0, 1.0)
-  //   .name("Depth Gain")
-  //   .onChange((value) => {
-  //     terrainMaterial.uniforms.depthGain.value = value;
-  //     terrainConfig.fbm.depthGain = value; // Update config
-  //   });
-
   terrainFolder
-    .addColor(terrainConfig.layers, "layer1Color")
+    .addColor(palette, "color1")
     .name("Color 1")
     .onChange((value) => {
       const vecColor = new THREE.Color(
-        value.r / 255.0,
-        value.g / 255.0,
-        value.b / 255.0
+        value[0] / 255.0,
+        value[1] / 255.0,
+        value[2] / 255.0
       );
-
       terrainMaterial.uniforms.layer1Color.value = vecColor;
+      palette.color1 = value;
     });
 
   terrainFolder
-    .addColor(terrainConfig.layers, "layer2Color")
+    .addColor(palette, "color2")
     .name("Color 2")
     .onChange((value) => {
       const vecColor = new THREE.Color(
-        value.r / 255.0,
-        value.g / 255.0,
-        value.b / 255.0
+        value[0] / 255.0,
+        value[1] / 255.0,
+        value[2] / 255.0
       );
-
       terrainMaterial.uniforms.layer2Color.value = vecColor;
+      palette.color2 = value;
     });
 
   terrainFolder
-    .addColor(terrainConfig.layers, "layer3Color")
+    .addColor(palette, "color3")
     .name("Color 3")
     .onChange((value) => {
       const vecColor = new THREE.Color(
-        value.r / 255.0,
-        value.g / 255.0,
-        value.b / 255.0
+        value[0] / 255.0,
+        value[1] / 255.0,
+        value[2] / 255.0
       );
-
       terrainMaterial.uniforms.layer3Color.value = vecColor;
+      palette.color3 = value;
     });
 
   terrainFolder
-    .addColor(terrainConfig.layers, "layer4Color")
+    .addColor(palette, "color4")
     .name("Color 4")
     .onChange((value) => {
       const vecColor = new THREE.Color(
-        value.r / 255.0,
-        value.g / 255.0,
-        value.b / 255.0
+        value[0] / 255.0,
+        value[1] / 255.0,
+        value[2] / 255.0
       );
-
       terrainMaterial.uniforms.layer4Color.value = vecColor;
+      palette.color4 = value;
     });
 
   waterFolder
@@ -111,19 +118,6 @@ export function setupGUI(terrainMaterial, waterMaterial) {
 
       waterMaterial.uniforms.waterDiffuse.value = vecColor;
     });
-
-  // waterFolder
-  //   .addColor(waterConfig.water, "waterSpecular")
-  //   .name("Water Specular")
-  //   .onChange((value) => {
-  //     const vecColor = new THREE.Color(
-  //       value.r / 255.0,
-  //       value.g / 255.0,
-  //       value.b / 255.0
-  //     );
-
-  //     waterMaterial.uniforms.waterSpecular.value = vecColor;
-  //   });
 
   terrainFolder.open();
   waterFolder.open();
