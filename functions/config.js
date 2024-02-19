@@ -77,6 +77,7 @@ export const waterConfig = {
     waterAmbient: colorPalette[2],
     waterDiffuse: colorPalette[3],
     waterSpecular: new THREE.Color(1.0, 1.0, 1.0),
+    waterHeight: 1.0,
   },
 };
 

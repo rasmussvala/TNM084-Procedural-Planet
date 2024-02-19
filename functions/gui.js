@@ -119,6 +119,14 @@ export function setupGUI(terrainMaterial, waterMaterial) {
       waterMaterial.uniforms.waterDiffuse.value = vecColor;
     });
 
+  waterFolder
+    .add(waterConfig.water, "waterHeight", 0.7, 1.1)
+    .name("Water Level")
+    .onChange((value) => {
+      waterMaterial.uniforms.waterHeight.value = value;
+      waterConfig.water.waterHeight = value;
+    });
+
   terrainFolder.open();
   waterFolder.open();
 }

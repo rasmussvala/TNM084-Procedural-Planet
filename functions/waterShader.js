@@ -5,6 +5,7 @@ export const waterVertexShader =
 varying vec3 vNormal;
 varying vec3 vPosition;
  
+uniform float waterHeight;
 uniform float time; 
 uniform float timeScale; ` +
   rot3 +
@@ -14,7 +15,7 @@ uniform float timeScale; ` +
 
 float fbm(vec3 st) {
 
-  float height = 1.0;
+  float height = waterHeight;
   float amplitude = 0.005;
   float frequency = 0.4;
   float octaves = 4.0;

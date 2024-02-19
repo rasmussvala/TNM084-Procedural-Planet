@@ -14,6 +14,7 @@ export function createWaterMaterial() {
       waterDiffuse: { value: waterConfig.water.waterDiffuse },
       waterSpecular: { value: waterConfig.water.waterSpecular },
       waterKa: { value: terrainConfig.phong.Ka },
+      waterHeight: { value: waterConfig.water.waterHeight },
     },
     vertexShader: waterVertexShader,
     fragmentShader: waterFragmentShader,
