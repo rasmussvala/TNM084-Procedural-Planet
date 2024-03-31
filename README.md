@@ -19,3 +19,6 @@ Follow these steps to install and run the project:
 4. Start the project by running the command: `npx vite`.
 
 You should now be able to access the project in a web browser at 'http://localhost:XXXX'.
+
+![image](https://github.com/rasmussvala/TNM084-Procedural-Planet/assets/91534734/e87c1334-d179-4c9c-81a1-5eb8e8f4b674)
+
