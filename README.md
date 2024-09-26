@@ -1,18 +1,25 @@
 # TNM084-Procedural-Planet
 
-This is a THREE.js project that generates procedurally created planets. Try it out! The link is in the description. If you want to download the code and run it on your machine, here's how you do it:
+## Overview
 
-Before you start, you need the following:
+This THREE.js project, part of the  [TNM084 Procedural Methods for Images](https://studieinfo.liu.se/kurs/TNM084/ht-2024) course at Linköping University, generates procedurally created planets. It utilizes various types of noises to produce unique landscapes and scenery.
+
+## Usage
+
+### Prerequisites
+
 - Node.js
 - npm (Node Package Manager)
 
-Then all you need to do is:
+### Setup
+
 1. Clone the repository.
-2. Navigate to the project directory by running the command: **cd this-repo**
-3. Install dependencies by running the command: **npm install**
-4. Start the project by running the command: **npx vite**
+2. Navigate to the project directory by running the command: ```cd TNM084-Procedural-Planet```
+3. Install dependencies by running the command: ```npm install```
+4. Start the project by running the command: ```npx vite```
    
 You should now be able to access the project in a web browser at 'http://localhost:XXXX'.
 
+## Render of a Generated Planet
 ![image](https://github.com/rasmussvala/TNM084-Procedural-Planet/assets/91534734/e87c1334-d179-4c9c-81a1-5eb8e8f4b674)
 
