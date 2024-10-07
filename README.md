@@ -2,7 +2,7 @@
 
 ## Overview
 
-This THREE.js project, part of the  [TNM084 Procedural Methods for Images](https://studieinfo.liu.se/kurs/TNM084/ht-2024) course at Linköping University, generates procedurally created planets. It utilizes various types of noises to produce unique landscapes and scenery.
+This THREE.js project, part of the  [TNM084 Procedural Methods for Images](https://studieinfo.liu.se/kurs/TNM084/ht-2024) course at Linköping University, generates procedurally created planets. It utilizes various types of noises to produce unique landscapes and scenery. Try it here: [procedural-planet.vercel.app](https://proceduralplanet.vercel.app/). To generate a new planet refresh the page. 
 
 ## Usage
 
