@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { Noise } from "noisejs"; // https://github.com/josephg/noisejs - stegu noise
 import { colorPalette } from "./config";
+import cloudBillboard from "../images/cloudBillboard.png";
 // Initialize a random seed for the noise
 const noise = new Noise(Math.random());
 
@@ -9,7 +10,7 @@ export function createClouds() {
 
   // Loads a texture for the clouds
   const textureLoader = new THREE.TextureLoader();
-  const cloudTexture = textureLoader.load("images/cloudBillboard.png");
+  const cloudTexture = textureLoader.load(cloudBillboard);
 
   // Creates the main group for all clouds
   const clouds = new THREE.Group();

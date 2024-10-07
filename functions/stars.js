@@ -1,9 +1,10 @@
 import * as THREE from "three";
+import starBillboard from "../images/starBillboard.png";
 
 export function createStars() {
   // Loads a texture for the stars
   const textureLoader = new THREE.TextureLoader();
-  const starTexture = textureLoader.load("images/starBillboard.png");
+  const starTexture = textureLoader.load(starBillboard);
 
   // Creates billboards (stars)
   const numberOfStars = 2000;
